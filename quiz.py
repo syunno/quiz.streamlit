@@ -41,6 +41,7 @@ for key, default in {
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
+
 # カスタムCSSと右上固定ボタン
 st.markdown("""
     <style>
@@ -115,11 +116,7 @@ if "edit_mode_toggle" in st.query_params:
     st.rerun()
 
 if "back_to_start" in st.query_params:
-    st.session_state["quiz_started"] = False
-    st.session_state["edit_mode"] = False
-    st.session_state["score"] = 0
-    st.session_state["current_question"] = 0
-    st.session_state["answered"] = False
+    st.session_state.clear()  # ← ここで完全リセット
     st.query_params.clear()
     st.rerun()
 
@@ -235,5 +232,5 @@ if st.session_state["edit_mode"]:
             st.error("⚠️ 問題・選択肢・解説をすべて入力してください。")
 
     if st.button("🔙 最初の画面に戻る（編集モード内）"):
-        st.session_state["edit_mode"] = False
+        st.session_state.clear()
         st.rerun()
