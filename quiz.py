@@ -154,12 +154,8 @@ if st.session_state["edit_mode"]:
     # 編集用CSS（色変更など）
     st.markdown("""
         <style>
-            h1 {
-                color: #FFD700;
-                font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-            }
             h2 {
-                color: #FFD700;
+                color: #00CED1;
                 font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
             }
             .stMarkdown h3 {
