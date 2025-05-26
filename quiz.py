@@ -137,14 +137,14 @@ elif not st.session_state["edit_mode"]:
 
         for option in question["options"]:
             if st.button(option, key=option):
-            st.session_state["selected_option"] = option
-            st.session_state["answered"] = True
+                st.session_state["selected_option"] = option
+                st.session_state["answered"] = True
 
         if st.session_state.get("answered", False):
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
-            st.session_state["score"] += 1
-            st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
+                st.session_state["score"] += 1
+                st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
     else:
         st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
 
