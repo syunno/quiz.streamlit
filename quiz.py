@@ -62,6 +62,37 @@ st.markdown("""
             background-position: center;
             background-attachment: fixed;
         }
+         .custom-title {
+            font-size: 64px;  /* タイトル用フォントサイズ */
+            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+            text-align: center;
+            color: white;
+        }
+        .custom-subtitle {
+            font-size: 40px;  /* サブタイトル用フォントサイズ */
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .custom-text {
+            font-size: 24px;  /* 解説用フォントサイズ */
+            line-height: 1.6;
+            text-align: justify;
+            color: white;
+        }
+        .stButton > button {
+            background-color: #0000FF;
+            color: white;
+            font-size: 30px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid gold;
+            transition: 0.3s;
+        }
+        .stButton > button:hover {
+            background-color: #0000FF;
+            transform: scale(1.05);
+        }
         h2 {
             color: #FFD700;
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
@@ -84,10 +115,6 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
-
-# タイトルセクション（再表示）
-st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
-st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
 
 
 # **タイトルセクション**
