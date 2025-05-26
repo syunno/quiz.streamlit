@@ -94,7 +94,7 @@ st.markdown("""
             transform: scale(1.05);
         }
         h2 {
-            color: black;
+            color: white;
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
         }
         .stMarkdown h3 {
