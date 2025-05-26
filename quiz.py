@@ -65,11 +65,11 @@ st.markdown("""
             font-size: 64px;  /* タイトル用フォントサイズ */
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
             text-align: center;
-            color: #4B0082;
+            color: #FFFFFB;
         }
         .custom-subtitle {
             font-size: 40px;  /* サブタイトル用フォントサイズ */
-            color: #800000;
+            color: #FFFFFB;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -89,7 +89,7 @@ st.markdown("""
             transition: 0.3s;
         }
         .stButton > button:hover {
-            background-color: #800000;
+            background-color: #00FFFF;
             transform: scale(1.05);
         }
     </style>
