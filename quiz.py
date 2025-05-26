@@ -92,6 +92,22 @@ st.markdown("""
             background-color: #0000FF;
             transform: scale(1.05);
         }
+        /* テキスト入力欄の文字色を赤に */
+        .stTextInput input {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* セレクトボックスの文字色を青に */
+        .stSelectbox div[data-baseweb="select"] {
+            color: blue;
+        }
+
+        /* テキストエリアの文字色を緑に */
+        .stTextArea textarea {
+            color: green;
+        }
+
     </style>
 """, unsafe_allow_html=True)
 
