@@ -207,8 +207,8 @@ if st.session_state["edit_mode"]:
                 "image_url": image_url,
                 "explanation": explanation
             }
-        save_quiz_data()
-        st.success(f"✅ 問題 {idx+1} を更新しました！")
+            save_quiz_data()
+            st.success(f"✅ 問題 {idx+1} を更新しました！")
 
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", "", key="new_question")
@@ -234,4 +234,3 @@ if st.session_state["edit_mode"]:
     if st.button("🔙 最初の画面に戻る（編集モード内）"):
         st.session_state.clear()
         st.rerun()
-
