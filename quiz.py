@@ -98,7 +98,50 @@ st.markdown("""
 # **タイトルセクション**
 st.markdown('<div class="custom-title">🎌デジタルクイズ🎌</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
+# **クイズ開始ボタン**
+if not st.session_state["quiz_started"]:
+    if st.button("クイズを開始"):
+        st.session_state["edit_mode"] = False
+        st.session_state["quiz_started"] = True
+        st.rerun()
+elif not st.session_state["edit_mode"]:
+    question_index = st.session_state["current_question"]
+    if question_index < len(st.session_state["quiz_data"]):
+        question = st.session_state["quiz_data"][question_index]
+        st.image(question["image_url"], width=600)
+        st.write(f"**問題: {question['question']}**")
+        selected_option = st.radio("選択肢:", question["options"], key="selected_option")
 
+        if st.button("回答する") and not st.session_state["answered"]:
+            st.session_state["answered"] = True
+            if selected_option == question["answer"]:
+                st.session_state["score"] += 1
+                st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
+            else:
+                st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
+            
+                        # 解説を表示
+            st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+
+        # 次の問題に進むボタン
+        if st.session_state["answered"]:
+            if st.button("次の問題へ"):
+                st.session_state["current_question"] += 1
+                st.session_state["answered"] = False
+                st.rerun()
+    else:
+        # クイズ終了画面
+        st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
+        st.write(f"あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}")
+        save_quiz_data()
+
+        # 最初の画面に戻るボタン
+        if st.button("🔙 最初の画面に戻る"):
+            st.session_state["quiz_started"] = False
+            st.session_state["score"] = 0
+            st.session_state["current_question"] = 0
+            st.session_state["answered"] = False
+            st.rerun()
 # **クイズ編集モード**
 if st.button("🔧 クイズ編集モード"):
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
@@ -152,49 +195,6 @@ if st.session_state["edit_mode"]:
         st.session_state["edit_mode"] = False
         st.rerun()
 
-# **クイズ開始ボタン**
-if not st.session_state["quiz_started"]:
-    if st.button("クイズを開始"):
-        st.session_state["edit_mode"] = False
-        st.session_state["quiz_started"] = True
-        st.rerun()
-elif not st.session_state["edit_mode"]:
-    question_index = st.session_state["current_question"]
-    if question_index < len(st.session_state["quiz_data"]):
-        question = st.session_state["quiz_data"][question_index]
-        st.image(question["image_url"], width=600)
-        st.write(f"**問題: {question['question']}**")
-        selected_option = st.radio("選択肢:", question["options"], key="selected_option")
 
-        if st.button("回答する") and not st.session_state["answered"]:
-            st.session_state["answered"] = True
-            if selected_option == question["answer"]:
-                st.session_state["score"] += 1
-                st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
-            else:
-                st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
-            
-                        # 解説を表示
-            st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
-
-        # 次の問題に進むボタン
-        if st.session_state["answered"]:
-            if st.button("次の問題へ"):
-                st.session_state["current_question"] += 1
-                st.session_state["answered"] = False
-                st.rerun()
-    else:
-        # クイズ終了画面
-        st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        st.write(f"あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}")
-        save_quiz_data()
-
-        # 最初の画面に戻るボタン
-        if st.button("🔙 最初の画面に戻る"):
-            st.session_state["quiz_started"] = False
-            st.session_state["score"] = 0
-            st.session_state["current_question"] = 0
-            st.session_state["answered"] = False
-            st.rerun()
 
 
