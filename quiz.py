@@ -507,6 +507,7 @@ elif st.session_state["edit_mode"]:
             st.success("✅ 新しい問題を追加しました！")
             st.set_query_params({})  # クエリパラメータをクリア
             st.experimental_rerun()
+    # 「最初の画面に戻る」ボタン
     if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False
         st.session_state["quiz_started"] = False
