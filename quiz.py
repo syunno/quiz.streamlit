@@ -30,7 +30,7 @@ if "quiz_data" not in st.session_state:
         if "explanation" not in q:
             q["explanation"] = "解説がまだ追加されていません"
 
-# その他のセッション状態
+# セッション状態の初期化
 for key, default in {
     "quiz_started": False,
     "score": 0,
@@ -148,7 +148,7 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
-                st.session_state["score"] += 1
+                st.session_state["score"] += 1  # 正確にスコアを加算
                 st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
@@ -163,7 +163,7 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     else:
         total_questions = len(st.session_state["quiz_data"])  # 全体の問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        st.write(f"あなたのスコア: {st.session_state['score']} / {total_questions}")  # 正しいスコア計算
+        st.write(f"あなたのスコア: {st.session_state['score']} / {total_questions}")  # 修正されたスコア表示
         save_quiz_data()
 
 # 編集モードページ
