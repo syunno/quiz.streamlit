@@ -92,7 +92,7 @@ st.markdown("""
         }
         .fixed-buttons {
             position: fixed;
-            top: 20px;
+            top: 70px;
             right: 20px;
             z-index: 1000;
             display: flex;
