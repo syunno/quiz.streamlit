@@ -30,7 +30,7 @@ if "quiz_data" not in st.session_state:
         if "explanation" not in q:
             q["explanation"] = "解説がまだ追加されていません"
 
-# セッション状態の初期化
+# その他のセッション状態
 for key, default in {
     "quiz_started": False,
     "score": 0,
