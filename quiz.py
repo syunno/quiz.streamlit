@@ -41,7 +41,7 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# カスタムCSS
+# カスタムCSSと編集ボタンの右上固定
 st.markdown("""
     <style>
         .stApp {
@@ -90,9 +90,37 @@ st.markdown("""
             color: white !important;
             font-weight: bold;
         }
-    
+        .edit-button-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .edit-button-container button {
+            background-color: #4444FF;
+            color: white;
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid gold;
+            cursor: pointer;
+        }
+        .edit-button-container button:hover {
+            background-color: #3333CC;
+        }
     </style>
+    <div class="edit-button-container">
+        <form action="" method="post">
+            <button name="edit_mode_toggle" type="submit">🔧 クイズ編集モード</button>
+        </form>
+    </div>
 """, unsafe_allow_html=True)
+
+# 編集モード切り替え処理
+if "edit_mode_toggle" in st.experimental_get_query_params():
+    st.session_state["edit_mode"] = not st.session_state["edit_mode"]
+    st.experimental_set_query_params()  # クエリパラメータをクリア
+    st.rerun()
 
 # タイトル
 st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
@@ -111,14 +139,12 @@ elif not st.session_state["edit_mode"]:
         st.image(question["image_url"], width=600)
         st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
 
-        # 選択肢を白文字ボタンで表示
         if not st.session_state["answered"]:
             for option in question["options"]:
                 if st.button(option, key=f"option_{option}"):
                     st.session_state["selected_option"] = option
                     st.session_state["answered"] = True
 
-        # 回答後の処理
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
@@ -144,12 +170,7 @@ elif not st.session_state["edit_mode"]:
             st.session_state["current_question"] = 0
             st.session_state["answered"] = False
             st.rerun()
-
-# 編集モード
-if st.button("🔧 クイズ編集モード"):
-    st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.rerun()
-
+# 編集モード画面
 if st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集</h2>", unsafe_allow_html=True)
 
@@ -193,6 +214,6 @@ if st.session_state["edit_mode"]:
         else:
             st.error("⚠️ 問題・選択肢・解説をすべて入力してください。")
 
-        if st.button("🔙 最初の画面に戻る"):
-            st.session_state["edit_mode"] = False
-            st.rerun()
+    if st.button("🔙 最初の画面に戻る"):
+        st.session_state["edit_mode"] = False
+        st.rerun()
