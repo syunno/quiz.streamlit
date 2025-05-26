@@ -226,10 +226,21 @@ elif st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
 
     with st.expander("⚙️ 編集画面のスタイル設定", expanded=False):
-        editor_style["label_color"] = st.text_input("ラベルの色（例: #ffffff）", editor_style["label_color"])
-        editor_style["label_size"] = st.text_input("ラベルのサイズ（例: 16px）", editor_style["label_size"])
-        editor_style["heading_color"] = st.text_input("見出しの色", editor_style["heading_color"])
-        editor_style["heading_size"] = st.text_input("見出しのサイズ", editor_style["heading_size"])
+    label_color = st.text_input("ラベルの色（例: #ffffff）", editor_style["label_color"], key="editor_label_color")
+    label_size = st.text_input("ラベルのサイズ（例: 16px）", editor_style["label_size"], key="editor_label_size")
+    heading_color = st.text_input("見出しの色", editor_style["heading_color"], key="editor_heading_color")
+    heading_size = st.text_input("見出しのサイズ", editor_style["heading_size"], key="editor_heading_size")
+
+    if st.button("🎨 スタイルを更新"):
+        st.session_state["editor_style"] = {
+            "label_color": label_color,
+            "label_size": label_size,
+            "heading_color": heading_color,
+            "heading_size": heading_size
+        }
+        st.success("✅ 編集画面のスタイルを更新しました！")
+        st.rerun()
+
 
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(
