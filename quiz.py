@@ -89,7 +89,7 @@ st.markdown("""
             transition: 0.3s;
         }
         .stButton > button:hover {
-            background-color: #00FFFF;
+            background-color: Aqua;
             transform: scale(1.05);
         }
     </style>
