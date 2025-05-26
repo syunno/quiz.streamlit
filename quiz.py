@@ -42,90 +42,10 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# カスタムCSSと右上固定ボタン
-st.markdown("""
-    <style>
-        .stApp {
-            background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        .custom-title {
-            font-size: 64px;
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-            text-align: center;
-            color: white;
-        }
-        .custom-subtitle {
-            font-size: 40px;
-            color: white;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .custom-text {
-            font-size: 24px;
-            line-height: 1.6;
-            text-align: justify;
-            color: white;
-        }
-        h2 {
-            color: white !important;
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-        }
-        label {
-            color: white !important;
-            font-weight: bold;
-        }
-        .fixed-buttons {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .fixed-buttons button {
-            background-color: #4444FF;
-            color: white;
-            font-size: 18px;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: 2px solid gold;
-            cursor: pointer;
-        }
-        .fixed-buttons button:hover {
-            background-color: #3333CC;
-        }
-    </style>
-    <div class="fixed-buttons">
-        <form action="" method="get">
-            <button name="edit_mode_toggle" type="submit">🔧 クイズ編集モード</button>
-        </form>
-        <form action="" method="get">
-            <button name="back_to_start" type="submit">🔙 最初の画面に戻る</button>
-        </form>
-    </div>
-""", unsafe_allow_html=True)
-
-# ボタン処理
-if "edit_mode_toggle" in st.query_params:
-    st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.query_params.clear()
-    st.rerun()
-
-if "back_to_start" in st.query_params:
-    st.session_state.clear()  # ← ここで完全リセット
-    st.query_params.clear()
-    st.rerun()
-# タイトル（最初の画面にのみ表示）
+# タイトルと最初の画面
 if not st.session_state["quiz_started"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
     st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-
-# クイズ開始ボタン（最初の画面にだけ表示）
-if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown("""
         <form action="" method="get" style="text-align:center; margin-top: 50px;">
             <button type="submit" name="start_quiz" style="
@@ -142,12 +62,12 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         </form>
     """, unsafe_allow_html=True)
 
-if "start_quiz" in st.query_params:
-    st.session_state["quiz_started"] = True
-    st.session_state["edit_mode"] = False
-    st.query_params.clear()
-    st.rerun()
-elif not st.session_state["edit_mode"]:
+    if "start_quiz" in st.query_params:
+        st.session_state["quiz_started"] = True
+        st.query_params.clear()
+        st.rerun()
+# クイズのページ
+if st.session_state["quiz_started"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
