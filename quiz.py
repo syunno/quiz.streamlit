@@ -85,6 +85,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# タイトルセクション（再表示）
+st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
 
 
 # **タイトルセクション**
