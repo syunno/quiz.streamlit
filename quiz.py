@@ -80,7 +80,7 @@ st.markdown("""
             color: white;
         }
         .stButton > button {
-            background-color: #00FFFF;
+            background-color: #0000FF;
             color: white;
             font-size: 30px;
             padding: 10px;
@@ -89,7 +89,7 @@ st.markdown("""
             transition: 0.3s;
         }
         .stButton > button:hover {
-            background-color: #00FFFF;
+            background-color: #0000FF;
             transform: scale(1.05);
         }
     </style>
