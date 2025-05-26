@@ -56,7 +56,7 @@ if "edit_mode" not in st.session_state:
 st.markdown("""
     <style>
         .stApp {
-            background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
+            background-image: url("https://tse4.mm.bing.net/th/id/OIP.Rwqvo--qeTaERBRSp579xQHaEO?cb=iwp2&rs=1&pid=ImgDetMain");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
