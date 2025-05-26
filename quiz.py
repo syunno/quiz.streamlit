@@ -41,7 +41,6 @@ for key, default in {
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
-
 # カスタムCSSと右上固定ボタン
 st.markdown("""
     <style>
@@ -79,7 +78,7 @@ st.markdown("""
         }
         .fixed-buttons {
             position: fixed;
-            top: 70px;
+            top: 20px;
             right: 20px;
             z-index: 1000;
             display: flex;
@@ -128,8 +127,8 @@ if "back_to_start" in st.query_params:
 st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
 
-# クイズ開始ボタン（HTMLで大きく）
-if not st.session_state["quiz_started"]:
+# クイズ開始ボタン（最初の画面にだけ表示）
+if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown("""
         <form action="" method="get" style="text-align:center; margin-top: 50px;">
             <button type="submit" name="start_quiz" style="
@@ -155,7 +154,14 @@ elif not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
-        st.image(question["image_url"], width=600)
+
+        # 画像表示（エラー対策付き）
+        if question.get("image_url"):
+            try:
+                st.image(question["image_url"], width=600)
+            except Exception:
+                st.warning("画像の読み込みに失敗しました。")
+
         st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
 
         if not st.session_state["answered"]:
@@ -189,7 +195,7 @@ if st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集</h2>", unsafe_allow_html=True)
 
     for idx, q in enumerate(st.session_state["quiz_data"]):
-        st.markdown(f"<h2>問題 {idx + 1}<h2>",unsafe_allow_html=True)
+        st.markdown(f"<h3>問題 {idx + 1}</h3>", unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
         answer = st.selectbox("正解を選択:", options, index=q["options"].index(q["answer"]), key=f"answer_{idx}")
@@ -207,7 +213,7 @@ if st.session_state["edit_mode"]:
             save_quiz_data()
             st.success(f"✅ 問題 {idx+1} を更新しました！")
 
-    st.markdown("<h2>➕ 新しい問題を追加<h2>",unsafe_allow_html=True)
+    st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", "", key="new_question")
     new_options = [st.text_input(f"新しい選択肢 {i+1}:", "", key=f"new_option_{i}") for i in range(4)]
     new_answer = st.selectbox("新しい正解:", new_options, key="new_answer")
