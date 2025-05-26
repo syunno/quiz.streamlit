@@ -99,6 +99,14 @@ st.markdown("""
             background-color: #3333CC;
         }
     </style>
+    <div class="fixed-buttons">
+        <form action="" method="get">
+            <button name="edit_mode_toggle" type="submit">🔧 クイズ編集モード</button>
+        </form>
+        <form action="" method="get">
+            <button name="back_to_start" type="submit">🔙 最初の画面に戻る</button>
+        </form>
+    </div>
 """, unsafe_allow_html=True)
 
 # 最初の画面
