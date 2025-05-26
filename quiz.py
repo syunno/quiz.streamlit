@@ -56,7 +56,7 @@ if "edit_mode" not in st.session_state:
 st.markdown("""
     <style>
         .stApp {
-            background-image: url("https://png.pngtree.com/thumb_back/fw800/background/20191123/pngtree-technology-blue-data-background-image_323014.jpg");
+            background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -96,7 +96,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # **タイトルセクション**
-st.markdown('<div class="custom-title">🎌デジタルクイズ🎌</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
 # **クイズ開始ボタン**
 if not st.session_state["quiz_started"]:
