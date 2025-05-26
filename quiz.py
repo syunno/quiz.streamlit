@@ -166,7 +166,6 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     else:
         total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
         total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 合計点数の計算を追加
-        st.write(f"あなたのスコア: {st.session_state['score']} / {total_points}")  # 修正されたスコア表示
         st.write(f"あなたのスコア: {st.session_state['current_question']} / {total_questions}")  # 問題数ベースのスコア表示
         save_quiz_data()
 
