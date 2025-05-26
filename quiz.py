@@ -110,16 +110,16 @@ st.markdown("""
         }
     </style>
     <div class="edit-button-container">
-        <form action="" method="post">
+        <form action="" method="get">
             <button name="edit_mode_toggle" type="submit">🔧 クイズ編集モード</button>
         </form>
     </div>
 """, unsafe_allow_html=True)
 
 # 編集モード切り替え処理
-if "edit_mode_toggle" in st.experimental_get_query_params():
+if "edit_mode_toggle" in st.query_params:
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.experimental_set_query_params()  # クエリパラメータをクリア
+    st.query_params.clear()
     st.rerun()
 
 # タイトル
