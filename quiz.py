@@ -65,11 +65,11 @@ st.markdown("""
             font-size: 64px;  /* タイトル用フォントサイズ */
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
             text-align: center;
-            color: #FFFFFB;
+            color: white;
         }
         .custom-subtitle {
             font-size: 40px;  /* サブタイトル用フォントサイズ */
-            color: #FFFFFB;
+            color: white;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -77,7 +77,7 @@ st.markdown("""
             font-size: 24px;  /* 解説用フォントサイズ */
             line-height: 1.6;
             text-align: justify;
-            color: #000000;
+            color: white;
         }
         .stButton > button {
             background-color: #a52a2a;
