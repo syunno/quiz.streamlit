@@ -149,43 +149,35 @@ if st.button("🔧 クイズ編集モード"):
     st.rerun()
 
 if st.session_state["edit_mode"]:
-   st.markdown("""
-    <style>
-        /* クイズ編集タイトル */
-        h2 {
-            color: #FFD700;  /* ゴールド */
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-        }
-
-        /* 問題タイトル */
-        .stMarkdown h3 {
-            color: #00CED1;  /* ターコイズブルー */
-        }
-
-        /* ラベル（問題を編集、選択肢など） */
-        label {
-            color: #FFFFFF !important;
-            font-weight: bold;
-        }
-
-        /* テキスト入力欄の文字色 */
-        .stTextInput input {
-            color: #FF69B4;  /* ピンク */
-        }
-
-        /* テキストエリアの文字色 */
-        .stTextArea textarea {
-            color: #ADFF2F;  /* 黄緑 */
-        }
-
-        /* セレクトボックスの文字色 */
-        .stSelectbox div[data-baseweb="select"] {
-            color: #87CEFA;  /* ライトブルー */
-        }
-    </style>
-    """, unsafe_allow_html=True)
     st.markdown("<h2>📝 クイズ編集</h2>", unsafe_allow_html=True)
-     for idx, q in enumerate(st.session_state["quiz_data"]):
+
+    # 編集用CSS（色変更など）
+    st.markdown("""
+        <style>
+            h2 {
+                color: #FFD700;
+                font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+            }
+            .stMarkdown h3 {
+                color: #00CED1;
+            }
+            label {
+                color: #FFFFFF !important;
+                font-weight: bold;
+            }
+            .stTextInput input {
+                color: #FF69B4;
+            }
+            .stTextArea textarea {
+                color: #ADFF2F;
+            }
+            .stSelectbox div[data-baseweb="select"] {
+                color: #87CEFA;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"### 問題 {idx + 1}")
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
