@@ -96,8 +96,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # **タイトルセクション**
-st.markdown('<div class="custom-title">🖌 墨書風クイズゲーム 🎌</div>', unsafe_allow_html=True)
-st.markdown('<div class="custom-subtitle">和風デザインの魅力を楽しもう！</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-title">🎌デジタルクイズ🎌</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
 
 # **クイズ編集モード**
 if st.button("🔧 クイズ編集モード"):
