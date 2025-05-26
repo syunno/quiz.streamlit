@@ -53,48 +53,69 @@ if "edit_mode" not in st.session_state:
     st.session_state["edit_mode"] = False
 
 # **カスタムCSS**
-st.markdown("""
-    <style>
-        .stApp {
-            background-image: url("https://tse4.mm.bing.net/th/id/OIP.Rwqvo--qeTaERBRSp579xQHaEO?cb=iwp2&rs=1&pid=ImgDetMain");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        .custom-title {
-            font-size: 64px;  /* タイトル用フォントサイズ */
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-            text-align: center;
-            color: white;
-        }
-        .custom-subtitle {
-            font-size: 40px;  /* サブタイトル用フォントサイズ */
-            color: white;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .custom-text {
-            font-size: 24px;  /* 解説用フォントサイズ */
-            line-height: 1.6;
-            text-align: justify;
-            color: white;
-        }
-        .stButton > button {
-            background-color: #0000FF;
-            color: white;
-            font-size: 30px;
-            padding: 10px;
-            border-radius: 5px;
-            border: 2px solid gold;
-            transition: 0.3s;
-        }
-        .stButton > button:hover {
-            background-color: #0000FF;
-            transform: scale(1.05);
-        }
 
-    </style>
+st.markdown("""
+    <style>
+        .stApp {
+            background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .custom-title {
+            font-size: 64px;
+            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+            text-align: center;
+            color: white;
+        }
+        .custom-subtitle {
+            font-size: 40px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .custom-text {
+            font-size: 24px;
+            line-height: 1.6;
+            text-align: justify;
+            color: white;
+        }
+        .stButton > button {
+            background-color: #0000FF;
+            color: white;
+            font-size: 30px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid gold;
+            transition: 0.3s;
+        }
+        .stButton > button:hover {
+            background-color: #0000FF;
+            transform: scale(1.05);
+        }
+        h2 {
+            color: #FFD700;
+            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+        }
+        .stMarkdown h3 {
+            color: #00CED1;
+        }
+        label {
+            color: #FFFFFF !important;
+            font-weight: bold;
+        }
+        .stTextInput input {
+            color: #FF69B4;
+        }
+        .stTextArea textarea {
+            color: #ADFF2F;
+        }
+        .stSelectbox div[data-baseweb="select"] {
+            color: #87CEFA;
+        }
+    </style>
 """, unsafe_allow_html=True)
+
 
 # **タイトルセクション**
 st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
@@ -147,43 +168,6 @@ elif not st.session_state["edit_mode"]:
 if st.button("🔧 クイズ編集モード"):
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     st.rerun()
-
-st.markdown("""
-    <style>
-        /* クイズ編集タイトル */
-        h2 {
-            color: #FFD700;  /* ゴールド */
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-        }
-
-        /* 問題タイトル */
-        .stMarkdown h3 {
-            color: #00CED1;  /* ターコイズブルー */
-        }
-
-        /* ラベル（問題を編集、選択肢など） */
-        label {
-            color: #FFFFFF !important;
-            font-weight: bold;
-        }
-
-        /* テキスト入力欄の文字色 */
-        .stTextInput input {
-            color: #FF69B4;  /* ピンク */
-        }
-
-        /* テキストエリアの文字色 */
-        .stTextArea textarea {
-            color: #ADFF2F;  /* 黄緑 */
-        }
-
-        /* セレクトボックスの文字色 */
-        .stSelectbox div[data-baseweb="select"] {
-            color: #87CEFA;  /* ライトブルー */
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 
 if st.session_state["edit_mode"]:
     st.markdown("<h2>📝 クイズ編集</h2>", unsafe_allow_html=True)
