@@ -41,7 +41,7 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# カスタムCSSと編集ボタンの右上固定
+# カスタムCSSと右上固定ボタン
 st.markdown("""
     <style>
         .stApp {
@@ -90,13 +90,16 @@ st.markdown("""
             color: white !important;
             font-weight: bold;
         }
-        .edit-button-container {
+        .fixed-buttons {
             position: fixed;
-            top: 70px;
+            top: 20px;
             right: 20px;
             z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .edit-button-container button {
+        .fixed-buttons button {
             background-color: #4444FF;
             color: white;
             font-size: 18px;
@@ -105,20 +108,32 @@ st.markdown("""
             border: 2px solid gold;
             cursor: pointer;
         }
-        .edit-button-container button:hover {
+        .fixed-buttons button:hover {
             background-color: #3333CC;
         }
     </style>
-    <div class="edit-button-container">
+    <div class="fixed-buttons">
         <form action="" method="get">
             <button name="edit_mode_toggle" type="submit">🔧 クイズ編集モード</button>
+        </form>
+        <form action="" method="get">
+            <button name="back_to_start" type="submit">🔙 最初の画面に戻る</button>
         </form>
     </div>
 """, unsafe_allow_html=True)
 
-# 編集モード切り替え処理
+# ボタン処理
 if "edit_mode_toggle" in st.query_params:
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
+    st.query_params.clear()
+    st.rerun()
+
+if "back_to_start" in st.query_params:
+    st.session_state["quiz_started"] = False
+    st.session_state["edit_mode"] = False
+    st.session_state["score"] = 0
+    st.session_state["current_question"] = 0
+    st.session_state["answered"] = False
     st.query_params.clear()
     st.rerun()
 
@@ -170,6 +185,7 @@ elif not st.session_state["edit_mode"]:
             st.session_state["current_question"] = 0
             st.session_state["answered"] = False
             st.rerun()
+
 # 編集モード画面
 if st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集</h2>", unsafe_allow_html=True)
@@ -214,6 +230,6 @@ if st.session_state["edit_mode"]:
         else:
             st.error("⚠️ 問題・選択肢・解説をすべて入力してください。")
 
-    if st.button("🔙 最初の画面に戻る"):
+    if st.button("🔙 最初の画面に戻る（編集モード内）"):
         st.session_state["edit_mode"] = False
         st.rerun()
