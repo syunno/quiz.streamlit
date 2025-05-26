@@ -176,7 +176,7 @@ if st.session_state["quiz_started"]:
 
 # 編集モード画面
 if st.session_state["edit_mode"]:
-    st.markdown("<h2>クイズ編集</h2>", unsafe_allow_html=True)
+    st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
 
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"<h3>問題 {idx + 1}</h3>", unsafe_allow_html=True)
@@ -186,23 +186,24 @@ if st.session_state["edit_mode"]:
         image_url = st.text_input("画像URLを編集:", q["image_url"], key=f"image_url_{idx}")
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
 
-        if st.button(f"問題 {idx+1} を更新", key=f"update_{idx}"):
+        if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
             st.session_state["quiz_data"][idx] = {
                 "question": question_text,
                 "options": options,
                 "answer": answer,
                 "image_url": image_url,
-                "explanation": explanation
+                "explanation": explanation,
             }
             save_quiz_data()
-            st.success(f"✅ 問題 {idx+1} を更新しました！")
+            st.success(f"✅ 問題 {idx + 1} を更新しました！")
 
+    # 新しい問題追加フォーム
     st.markdown("### ➕ 新しい問題を追加")
-    new_question = st.text_input("新しい問題:", "", key="new_question")
-    new_options = [st.text_input(f"新しい選択肢 {i+1}:", "", key=f"new_option_{i}") for i in range(4)]
-    new_answer = st.selectbox("新しい正解:", new_options, key="new_answer")
-    new_image_url = st.text_input("新しい画像URL:", "", key="new_image_url")
-    new_explanation = st.text_area("新しい解説:", "", key="new_explanation")
+    new_question = st.text_input("新しい問題:", key="new_question")
+    new_options = [st.text_input(f"選択肢 {i + 1}:", key=f"new_option_{i}") for i in range(4)]
+    new_answer = st.selectbox("正解:", new_options, key="new_answer")
+    new_image_url = st.text_input("画像URL:", key="new_image_url")
+    new_explanation = st.text_area("解説:", key="new_explanation")
 
     if st.button("➕ 問題を追加"):
         if new_question and all(new_options) and new_answer and new_explanation:
@@ -211,13 +212,14 @@ if st.session_state["edit_mode"]:
                 "options": new_options,
                 "answer": new_answer,
                 "image_url": new_image_url,
-                "explanation": new_explanation
+                "explanation": new_explanation,
             })
             save_quiz_data()
             st.success("✅ 新しい問題を追加しました！")
         else:
-            st.error("⚠️ 問題・選択肢・解説をすべて入力してください。")
+            st.error("⚠️ 必須項目をすべて入力してください！")
 
     if st.button("🔙 最初の画面に戻る（編集モード内）"):
-        st.session_state.clear()
+        st.session_state["quiz_started"] = False  # 編集モードから最初の画面に戻る
+        st.session_state["edit_mode"] = False  # 編集モードを解除
         st.rerun()
