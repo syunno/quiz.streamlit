@@ -114,19 +114,6 @@ st.markdown("""
             color: black;
         }
         
-/* ラジオボタンの隣の文字を白にする */
-        div[role="radiogroup"] label span {
-            color: white !important;
-            font-weight: bold;
-        }
-
-        /* 念のため、他の構造にも対応 */
-        div[role="radiogroup"] label div {
-            color: white !important;
-        }
-
-        
-
     </style>
 """, unsafe_allow_html=True)
 
@@ -146,25 +133,31 @@ elif not st.session_state["edit_mode"]:
         question = st.session_state["quiz_data"][question_index]
         st.image(question["image_url"], width=600)
         st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
-        selected_option = st.radio("選択肢:", question["options"], key="selected_option")
+        st.markdown("<p style='color:white; font-size:20px;'><strong>選択肢:</strong></p>", unsafe_allow_html=True)
 
-        if st.button("回答する") and not st.session_state["answered"]:
+        for option in question["options"]:
+            if st.button(option, key=option):
+            st.session_state["selected_option"] = option
             st.session_state["answered"] = True
-            if selected_option == question["answer"]:
-                st.session_state["score"] += 1
-                st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
-            else:
-                st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
-            
-                        # 解説を表示
-            st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
 
-        # 次の問題に進むボタン
-        if st.session_state["answered"]:
-            if st.button("次の問題へ"):
-                st.session_state["current_question"] += 1
-                st.session_state["answered"] = False
-                st.rerun()
+        if st.session_state.get("answered", False):
+            selected_option = st.session_state["selected_option"]
+            if selected_option == question["answer"]:
+            st.session_state["score"] += 1
+            st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
+    else:
+        st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
+
+    st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+
+    if st.button("次の問題へ"):
+        st.session_state["current_question"] += 1
+        st.session_state["answered"] = False
+        st.session_state.pop("selected_option", None)
+        st.rerun()
+
+
+
     else:
         # クイズ終了画面
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
