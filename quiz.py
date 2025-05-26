@@ -193,5 +193,5 @@ if st.session_state["edit_mode"]:
             st.error("⚠️ 問題・選択肢・解説をすべて入力してください。")
 
         if st.button("🔙 最初の画面に戻る"):
-        st.session_state["edit_mode"] = False
-        st.rerun()
+            st.session_state["edit_mode"] = False
+            st.rerun()
