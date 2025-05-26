@@ -42,7 +42,66 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# タイトルと最初の画面
+# カスタムCSSの適用
+st.markdown("""
+    <style>
+        .stApp {
+            background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .custom-title {
+            font-size: 64px;
+            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+            text-align: center;
+            color: white;
+        }
+        .custom-subtitle {
+            font-size: 40px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .custom-text {
+            font-size: 24px;
+            line-height: 1.6;
+            text-align: justify;
+            color: white;
+        }
+        h2 {
+            color: white !important;
+            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+        }
+        label {
+            color: white !important;
+            font-weight: bold;
+        }
+        .fixed-buttons {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fixed-buttons button {
+            background-color: #4444FF;
+            color: white;
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid gold;
+            cursor: pointer;
+        }
+        .fixed-buttons button:hover {
+            background-color: #3333CC;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# 最初の画面
 if not st.session_state["quiz_started"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
     st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
@@ -52,7 +111,7 @@ if not st.session_state["quiz_started"]:
                 font-size: 36px;
                 padding: 20px 60px;
                 background-color: #28a745;
-                color: #000000;
+                color: white;
                 border: 4px solid gold;
                 border-radius: 12px;
                 cursor: pointer;
