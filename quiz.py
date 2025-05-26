@@ -149,22 +149,38 @@ if st.button("🔧 クイズ編集モード"):
     st.rerun()
 
 if st.session_state["edit_mode"]:
-    st.markdown("""
+   st.markdown("""
     <style>
-        /* テキスト入力欄の文字色を赤に */
-        .stTextInput input {
-            color: red;
+        /* クイズ編集タイトル */
+        h2 {
+            color: #FFD700;  /* ゴールド */
+            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+        }
+
+        /* 問題タイトル */
+        .stMarkdown h3 {
+            color: #00CED1;  /* ターコイズブルー */
+        }
+
+        /* ラベル（問題を編集、選択肢など） */
+        label {
+            color: #FFFFFF !important;
             font-weight: bold;
         }
 
-        /* セレクトボックスの文字色を青に */
-        .stSelectbox div[data-baseweb="select"] {
-            color: blue;
+        /* テキスト入力欄の文字色 */
+        .stTextInput input {
+            color: #FF69B4;  /* ピンク */
         }
 
-        /* テキストエリアの文字色を緑に */
+        /* テキストエリアの文字色 */
         .stTextArea textarea {
-            color: green;
+            color: #ADFF2F;  /* 黄緑 */
+        }
+
+        /* セレクトボックスの文字色 */
+        .stSelectbox div[data-baseweb="select"] {
+            color: #87CEFA;  /* ライトブルー */
         }
     </style>
     """, unsafe_allow_html=True)
