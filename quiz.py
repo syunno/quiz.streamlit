@@ -101,7 +101,7 @@ st.markdown("""
             color: #00CED1;
         }
         label {
-            color: #FFFFFF !important;
+            color: white !important;
             font-weight: bold;
         }
         .stTextInput input {
@@ -131,7 +131,7 @@ elif not st.session_state["edit_mode"]:
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
         st.image(question["image_url"], width=600)
-        st.write(f"**問題: {question['question']}**")
+        st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
         selected_option = st.radio("選択肢:", question["options"], key="selected_option")
 
         if st.button("回答する") and not st.session_state["answered"]:
