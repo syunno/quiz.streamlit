@@ -56,17 +56,7 @@ for key, default in {
     "score": 0,
     "current_question": 0,
     "answered": False,
-    "edit_mode": False,
-    "bulk_styles": {
-        "question_color": "",
-        "question_size": "",
-        "explanation_color": "",
-        "explanation_size": "",
-        "answer_color": "",
-        "answer_size": "",
-        "wrong_color": "",
-        "wrong_size": ""
-    }
+    "edit_mode": False
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -123,14 +113,15 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 # 編集モード切り替え処理
-if "edit_mode_toggle" in st.experimental_get_query_params():
+query_params = st.query_params
+if "edit_mode_toggle" in query_params:
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.experimental_set_query_params()
+    st.set_query_params()  # クエリパラメータをクリア
     st.experimental_rerun()
-if "back_to_start" in st.experimental_get_query_params():
+if "back_to_start" in query_params:
     st.session_state["quiz_started"] = False
     st.session_state["edit_mode"] = False
-    st.experimental_set_query_params()
+    st.set_query_params()  # クエリパラメータをクリア
     st.experimental_rerun()
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -151,9 +142,9 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
             </button>
         </form>
     """, unsafe_allow_html=True)
-    if "start_quiz" in st.experimental_get_query_params():
+    if "start_quiz" in query_params:
         st.session_state["quiz_started"] = True
-        st.experimental_set_query_params()
+        st.set_query_params()  # クエリパラメータをクリア
         st.experimental_rerun()
 # クイズ画面
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -219,25 +210,50 @@ elif st.session_state["edit_mode"]:
     # 一括スタイル設定セクションの追加
     st.markdown("<h2>一括スタイル設定</h2>", unsafe_allow_html=True)
     with st.form("bulk_style_form"):
-        st.markdown(f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>問題文の色（例: #ffffff）</label>", unsafe_allow_html=True)
+        st.markdown(
+            f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>問題文の色（例: #ffffff）</label>",
+            unsafe_allow_html=True
+        )
         bulk_question_color = st.text_input("", "#ffffff", key="bulk_question_color")
-        st.markdown(f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>問題文のサイズ（例: 24px）</label>", unsafe_allow_html=True)
+        st.markdown(
+            f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>問題文のサイズ（例: 24px）</label>",
+            unsafe_allow_html=True
+        )
         bulk_question_size = st.text_input("", "24px", key="bulk_question_size")
-        st.markdown(f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>解説の色（例: #ffffff）</label>", unsafe_allow_html=True)
+        st.markdown(
+            f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>解説の色（例: #ffffff）</label>",
+            unsafe_allow_html=True
+        )
         bulk_explanation_color = st.text_input("", "#ffffff", key="bulk_explanation_color")
-        st.markdown(f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>解説のサイズ（例: 18px）</label>", unsafe_allow_html=True)
+        st.markdown(
+            f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>解説のサイズ（例: 18px）</label>",
+            unsafe_allow_html=True
+        )
         bulk_explanation_size = st.text_input("", "18px", key="bulk_explanation_size")
-        st.markdown(f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>正解メッセージの色（例: #00ff00）</label>", unsafe_allow_html=True)
+        st.markdown(
+            f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>正解メッセージの色（例: #00ff00）</label>",
+            unsafe_allow_html=True
+        )
         bulk_answer_color = st.text_input("", "#00ff00", key="bulk_answer_color")
-        st.markdown(f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>正解メッセージのサイズ（例: 28px）</label>", unsafe_allow_html=True)
+        st.markdown(
+            f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>正解メッセージのサイズ（例: 28px）</label>",
+            unsafe_allow_html=True
+        )
         bulk_answer_size = st.text_input("", "28px", key="bulk_answer_size")
-        st.markdown(f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>不正解メッセージの色（例: #ff0000）</label>", unsafe_allow_html=True)
+        st.markdown(
+            f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>不正解メッセージの色（例: #ff0000）</label>",
+            unsafe_allow_html=True
+        )
         bulk_wrong_color = st.text_input("", "#ff0000", key="bulk_wrong_color")
-        st.markdown(f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>不正解メッセージのサイズ（例: 28px）</label>", unsafe_allow_html=True)
+        st.markdown(
+            f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>不正解メッセージのサイズ（例: 28px）</label>",
+            unsafe_allow_html=True
+        )
         bulk_wrong_size = st.text_input("", "28px", key="bulk_wrong_size")
         submitted = st.form_submit_button("🔄 一括適用")
     if submitted:
         bulk_styles = {}
+      
         # バリデーション（任意）
         def is_valid_color(code):
             if isinstance(code, str) and code.startswith("#") and (len(code) == 7 or len(code) == 4):
@@ -278,6 +294,7 @@ elif st.session_state["edit_mode"]:
                 q["style"].update(bulk_styles)
             save_quiz_data()
             st.success("✅ 一括スタイルをすべての問題に適用しました！")
+            st.set_query_params()  # クエリパラメータのクリア
             st.experimental_rerun()
     # 編集画面のスタイル設定
     with st.expander("⚙️ 編集画面のスタイル設定", expanded=False):
@@ -312,6 +329,7 @@ elif st.session_state["edit_mode"]:
                 }
                 save_quiz_data()
                 st.success("✅ 編集画面のスタイルを更新しました！")
+                st.set_query_params()  # クエリパラメータのクリア
                 st.experimental_rerun()
     def styled_label(text):
         return f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>{text}</label>"
@@ -351,7 +369,6 @@ elif st.session_state["edit_mode"]:
         wrong_color = st.text_input("", style.get("wrong_color", "#ff0000"), key=f"w_color_{idx}")
         st.markdown(styled_label("不正解メッセージのサイズ"), unsafe_allow_html=True)
         wrong_size = st.text_input("", style.get("wrong_size", "28px"), key=f"w_size_{idx}")
-        # 新しい問題の追加セクションはここに続く...
         if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
             # バリデーション（任意）
             errors = []
@@ -402,6 +419,7 @@ elif st.session_state["edit_mode"]:
                 }
                 save_quiz_data()
                 st.success(f"✅ 問題 {idx + 1} を更新しました！")
+                st.set_query_params()  # クエリパラメータのクリア
                 st.experimental_rerun()
     # 新しい問題の追加セクション
     st.markdown(f"<h3 style='color:{editor_style['heading_color']}; font-size:{editor_style['heading_size']};'>➕ 新しい問題を追加</h3>", unsafe_allow_html=True)
@@ -447,21 +465,21 @@ elif st.session_state["edit_mode"]:
             errors.append("新しい問題: 正解を選択してください。")
         if not new_explanation:
             errors.append("新しい問題: 解説を入力してください。")
-        if not is_valid_color(new_q_color):
+        if not (new_q_color.startswith("#") and (len(new_q_color) == 7 or len(new_q_color) == 4)):
             errors.append("新しい問題: 問題文の色が無効です。例: #ffffff")
-        if not new_q_size.endswith("px") or not new_q_size[:-2].isdigit():
+        if not (new_q_size.endswith("px") and new_q_size[:-2].isdigit()):
             errors.append("新しい問題: 問題文のサイズが無効です。例: 24px")
-        if not is_valid_color(new_e_color):
+        if not (new_e_color.startswith("#") and (len(new_e_color) == 7 or len(new_e_color) == 4)):
             errors.append("新しい問題: 解説の色が無効です。例: #ffffff")
-        if not new_e_size.endswith("px") or not new_e_size[:-2].isdigit():
+        if not (new_e_size.endswith("px") and new_e_size[:-2].isdigit()):
             errors.append("新しい問題: 解説のサイズが無効です。例: 18px")
-        if not is_valid_color(new_a_color):
+        if not (new_a_color.startswith("#") and (len(new_a_color) == 7 or len(new_a_color) == 4)):
             errors.append("新しい問題: 正解メッセージの色が無効です。例: #00ff00")
-        if not new_a_size.endswith("px") or not new_a_size[:-2].isdigit():
+        if not (new_a_size.endswith("px") and new_a_size[:-2].isdigit()):
             errors.append("新しい問題: 正解メッセージのサイズが無効です。例: 28px")
-        if not is_valid_color(new_w_color):
+        if not (new_w_color.startswith("#") and (len(new_w_color) == 7 or len(new_w_color) == 4)):
             errors.append("新しい問題: 不正解メッセージの色が無効です。例: #ff0000")
-        if not new_w_size.endswith("px") or not new_w_size[:-2].isdigit():
+        if not (new_w_size.endswith("px") and new_w_size[:-2].isdigit()):
             errors.append("新しい問題: 不正解メッセージのサイズが無効です。例: 28px")
         if errors:
             for error in errors:
@@ -487,8 +505,10 @@ elif st.session_state["edit_mode"]:
             })
             save_quiz_data()
             st.success("✅ 新しい問題を追加しました！")
+            st.set_query_params()  # クエリパラメータのクリア
             st.experimental_rerun()
     if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False
         st.session_state["quiz_started"] = False
+        st.set_query_params()  # クエリパラメータのクリア
         st.experimental_rerun()
