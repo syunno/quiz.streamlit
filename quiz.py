@@ -55,66 +55,36 @@ if "edit_mode" not in st.session_state:
 # **カスタムCSS**
 
 st.markdown("""
-    <style>
-        .stApp {
-            background-image: url("https://image.freepik.com/free-vector/_1017-24913.jpg");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        .custom-title {
-            font-size: 64px;
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-            text-align: center;
-            color: white;
-        }
-        .custom-subtitle {
-            font-size: 40px;
-            color: white;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .custom-text {
-            font-size: 24px;
-            line-height: 1.6;
-            text-align: justify;
-            color: white;
-        }
-        .stButton > button {
-            background-color: #0000FF;
-            color: white;
-            font-size: 30px;
-            padding: 10px;
-            border-radius: 5px;
-            border: 2px solid gold;
-            transition: 0.3s;
-        }
-        .stButton > button:hover {
-            background-color: #0000FF;
-            transform: scale(1.05);
-        }
-        h2 {
-            color: #FFD700;
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-        }
-        .stMarkdown h3 {
-            color: #00CED1;
-        }
-        label {
-            color: #FFFFFF !important;
-            font-weight: bold;
-        }
-        .stTextInput input {
-            color: #FF69B4;
-        }
-        .stTextArea textarea {
-            color: #ADFF2F;
-        }
-        .stSelectbox div[data-baseweb="select"] {
-            color: #87CEFA;
-        }
-    </style>
+    <style>
+        .stApp {
+            background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        h2 {
+            color: #FFD700;
+            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+        }
+        .stMarkdown h3 {
+            color: #00CED1;
+        }
+        label {
+            color: #FFFFFF !important;
+            font-weight: bold;
+        }
+        .stTextInput input {
+            color: #FF69B4;
+        }
+        .stTextArea textarea {
+            color: #ADFF2F;
+        }
+        .stSelectbox div[data-baseweb="select"] {
+            color: #87CEFA;
+        }
+    </style>
 """, unsafe_allow_html=True)
+
 
 
 # **タイトルセクション**
