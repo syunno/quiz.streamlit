@@ -36,12 +36,13 @@ for key, default in {
     "score": 0,
     "current_question": 0,
     "answered": False,
-    "edit_mode": False
+    "edit_mode": False,
+    "start_quiz_clicked": False
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
 
-# カスタムCSSと右上固定ボタン＋開始ボタン拡大
+# カスタムCSSと右上固定ボタン
 st.markdown("""
     <style>
         .stApp {
@@ -67,32 +68,6 @@ st.markdown("""
             line-height: 1.6;
             text-align: justify;
             color: white;
-        }
-        .stButton > button {
-            background-color: #0000FF;
-            color: white;
-            font-size: 24px;
-            padding: 10px;
-            border-radius: 5px;
-            border: 2px solid gold;
-            transition: 0.3s;
-            margin-bottom: 10px;
-        }
-        .stButton > button:hover {
-            background-color: #0000AA;
-            transform: scale(1.05);
-        }
-        .start-button > button {
-            font-size: 32px !important;
-            padding: 20px 40px !important;
-            background-color: #28a745 !important;
-            color: white !important;
-            border-radius: 10px !important;
-            border: 3px solid gold !important;
-        }
-        .start-button > button:hover {
-            background-color: #218838 !important;
-            transform: scale(1.1);
         }
         h2 {
             color: white !important;
@@ -153,14 +128,29 @@ if "back_to_start" in st.query_params:
 st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
 
-# クイズ開始
+# クイズ開始ボタン（HTMLで大きく）
 if not st.session_state["quiz_started"]:
-    st.markdown('<div class="start-button">', unsafe_allow_html=True)
-    if st.button("クイズを開始"):
-        st.session_state["edit_mode"] = False
-        st.session_state["quiz_started"] = True
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("""
+        <form action="" method="get" style="text-align:center; margin-top: 50px;">
+            <button type="submit" name="start_quiz" style="
+                font-size: 36px;
+                padding: 20px 60px;
+                background-color: #28a745;
+                color: white;
+                border: 4px solid gold;
+                border-radius: 12px;
+                cursor: pointer;
+            ">
+                ▶️ クイズを開始
+            </button>
+        </form>
+    """, unsafe_allow_html=True)
+
+if "start_quiz" in st.query_params:
+    st.session_state["quiz_started"] = True
+    st.session_state["edit_mode"] = False
+    st.query_params.clear()
+    st.rerun()
 elif not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
@@ -193,12 +183,6 @@ elif not st.session_state["edit_mode"]:
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
         st.write(f"あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}")
         save_quiz_data()
-        if st.button("🔙 最初の画面に戻る"):
-            st.session_state["quiz_started"] = False
-            st.session_state["score"] = 0
-            st.session_state["current_question"] = 0
-            st.session_state["answered"] = False
-            st.rerun()
 
 # 編集モード画面
 if st.session_state["edit_mode"]:
@@ -247,4 +231,3 @@ if st.session_state["edit_mode"]:
     if st.button("🔙 最初の画面に戻る（編集モード内）"):
         st.session_state["edit_mode"] = False
         st.rerun()
-
