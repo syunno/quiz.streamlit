@@ -1,59 +1,47 @@
-# 必要なライブラリをインポート
 import streamlit as st
 import json
 from pathlib import Path
 
-# **データ保存関数**
+# データ保存関数
 def save_quiz_data():
-    """
-    現在のクイズデータをJSONファイルに保存する関数
-    """
     with open("quiz_data.json", "w", encoding="utf-8") as f:
         json.dump(st.session_state["quiz_data"], f, ensure_ascii=False)
 
-# **データロード関数**
+# データロード関数
 def load_quiz_data():
-    """
-    JSONファイルからクイズデータをロードする関数。
-    ファイルが存在する場合のみデータをロード。
-    """
     if Path("quiz_data.json").exists():
         with open("quiz_data.json", "r", encoding="utf-8") as f:
             st.session_state["quiz_data"] = json.load(f)
 
-# **セッション初期化**
+# セッション初期化
 if "quiz_data" not in st.session_state:
     load_quiz_data()
-    if "quiz_data" not in st.session_state:  # ファイルがない場合の初期データ
+    if "quiz_data" not in st.session_state:
         st.session_state["quiz_data"] = [
-            {"question": "この城の名前は？", "options": ["姫路城", "松本城", "大阪城", "熊本城"], 
-             "answer": "姫路城", "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
-             "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。"
-            },
-            {"question": "この花の名前は？", "options": ["梅", "桜", "牡丹", "藤"], 
-             "answer": "桜", "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Japanese_Sakura.JPG/800px-Japanese_Sakura.JPG",
-             "explanation": "桜は日本の象徴的な花で、春の訪れを知らせる風物詩です。"
+            {
+                "question": "この城の名前は？",
+                "options": ["姫路城", "松本城", "大阪城", "熊本城"],
+                "answer": "姫路城",
+                "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
+                "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。"
             }
         ]
-    # デフォルト値を補完（explanation キーがない場合）
     for q in st.session_state["quiz_data"]:
         if "explanation" not in q:
             q["explanation"] = "解説がまだ追加されていません"
 
-# セッション状態の管理
-if "quiz_started" not in st.session_state:
-    st.session_state["quiz_started"] = False
-if "score" not in st.session_state:
-    st.session_state["score"] = 0
-if "current_question" not in st.session_state:
-    st.session_state["current_question"] = 0
-if "answered" not in st.session_state:
-    st.session_state["answered"] = False
-if "edit_mode" not in st.session_state:
-    st.session_state["edit_mode"] = False
+# その他のセッション状態
+for key, default in {
+    "quiz_started": False,
+    "score": 0,
+    "current_question": 0,
+    "answered": False,
+    "edit_mode": False
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
-# **カスタムCSS**
-
+# カスタムCSS
 st.markdown("""
     <style>
         .stApp {
@@ -62,20 +50,20 @@ st.markdown("""
             background-position: center;
             background-attachment: fixed;
         }
-         .custom-title {
-            font-size: 64px;  /* タイトル用フォントサイズ */
+        .custom-title {
+            font-size: 64px;
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
             text-align: center;
             color: white;
         }
         .custom-subtitle {
-            font-size: 40px;  /* サブタイトル用フォントサイズ */
+            font-size: 40px;
             color: white;
             margin-bottom: 20px;
             text-align: center;
         }
         .custom-text {
-            font-size: 24px;  /* 解説用フォントサイズ */
+            font-size: 24px;
             line-height: 1.6;
             text-align: justify;
             color: white;
@@ -83,45 +71,33 @@ st.markdown("""
         .stButton > button {
             background-color: #0000FF;
             color: white;
-            font-size: 30px;
+            font-size: 24px;
             padding: 10px;
             border-radius: 5px;
             border: 2px solid gold;
             transition: 0.3s;
+            margin-bottom: 10px;
         }
         .stButton > button:hover {
-            background-color: #0000FF;
+            background-color: #0000AA;
             transform: scale(1.05);
         }
         h2 {
             color: white !important;
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
         }
-        .stMarkdown h3 {
-            color: #00CED1;
-        }
         label {
             color: white !important;
             font-weight: bold;
         }
-        .stTextInput input {
-            color: black;
-        }
-        .stTextArea textarea {
-            color: black;
-        }
-        .stSelectbox div[data-baseweb="select"] {
-            color: black;
-        }
-        
     </style>
 """, unsafe_allow_html=True)
 
-
-# **タイトルセクション**
+# タイトル
 st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-# **クイズ開始ボタン**
+
+# クイズ開始
 if not st.session_state["quiz_started"]:
     if st.button("クイズを開始"):
         st.session_state["edit_mode"] = False
@@ -133,45 +109,42 @@ elif not st.session_state["edit_mode"]:
         question = st.session_state["quiz_data"][question_index]
         st.image(question["image_url"], width=600)
         st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
-        st.markdown("<p style='color:white; font-size:20px;'><strong>選択肢:</strong></p>", unsafe_allow_html=True)
 
-        for option in question["options"]:
-            if st.button(option, key=option):
-                st.session_state["selected_option"] = option
-                st.session_state["answered"] = True
+        # 選択肢を白文字ボタンで表示
+        if not st.session_state["answered"]:
+            for option in question["options"]:
+                if st.button(option, key=f"option_{option}"):
+                    st.session_state["selected_option"] = option
+                    st.session_state["answered"] = True
 
-        if st.session_state.get("answered", False):
+        # 回答後の処理
+        if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
                 st.session_state["score"] += 1
                 st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
+            else:
+                st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
+
+            st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+
+            if st.button("次の問題へ"):
+                st.session_state["current_question"] += 1
+                st.session_state["answered"] = False
+                st.session_state.pop("selected_option", None)
+                st.rerun()
     else:
-        st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
-
-    st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
-
-    if st.button("次の問題へ"):
-        st.session_state["current_question"] += 1
-        st.session_state["answered"] = False
-        st.session_state.pop("selected_option", None)
-        st.rerun()
-
-
-
-    else:
-        # クイズ終了画面
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
         st.write(f"あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}")
         save_quiz_data()
-
-        # 最初の画面に戻るボタン
         if st.button("🔙 最初の画面に戻る"):
             st.session_state["quiz_started"] = False
             st.session_state["score"] = 0
             st.session_state["current_question"] = 0
             st.session_state["answered"] = False
             st.rerun()
-# **クイズ編集モード**
+
+# 編集モード
 if st.button("🔧 クイズ編集モード"):
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     st.rerun()
@@ -179,15 +152,13 @@ if st.button("🔧 クイズ編集モード"):
 if st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集</h2>", unsafe_allow_html=True)
 
-    
-
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"### 問題 {idx + 1}")
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
         answer = st.selectbox("正解を選択:", options, index=q["options"].index(q["answer"]), key=f"answer_{idx}")
         image_url = st.text_input("画像URLを編集:", q["image_url"], key=f"image_url_{idx}")
-        explanation = st.text_area("解説を編集:", q.get("explanation", "解説がまだ追加されていません"), key=f"explanation_{idx}")
+        explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
 
         if st.button(f"問題 {idx+1} を更新", key=f"update_{idx}"):
             st.session_state["quiz_data"][idx] = {
@@ -200,7 +171,6 @@ if st.session_state["edit_mode"]:
             save_quiz_data()
             st.success(f"✅ 問題 {idx+1} を更新しました！")
 
-    # 新しい問題を追加
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", "", key="new_question")
     new_options = [st.text_input(f"新しい選択肢 {i+1}:", "", key=f"new_option_{i}") for i in range(4)]
@@ -222,7 +192,6 @@ if st.session_state["edit_mode"]:
         else:
             st.error("⚠️ 問題・選択肢・解説をすべて入力してください。")
 
-    # 戻るボタン
-    if st.button("🔙 最初の画面に戻る"):
+        if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False
         st.rerun()
