@@ -94,7 +94,7 @@ st.markdown("""
             transform: scale(1.05);
         }
         h2 {
-            color: #FFD700;
+            color: black;
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
         }
         .stMarkdown h3 {
@@ -105,13 +105,13 @@ st.markdown("""
             font-weight: bold;
         }
         .stTextInput input {
-            color: #FF69B4;
+            color: black;
         }
         .stTextArea textarea {
-            color: #ADFF2F;
+            color: black;
         }
         .stSelectbox div[data-baseweb="select"] {
-            color: #87CEFA;
+            color: black;
         }
     </style>
 """, unsafe_allow_html=True)
