@@ -13,41 +13,40 @@ def load_quiz_data():
         with open("quiz_data.json", "r", encoding="utf-8") as f:
             st.session_state["quiz_data"] = json.load(f)
 
-# セッション状態の初期化を安全に実行
+# セッション初期化
+if "quiz_data" not in st.session_state:
+    load_quiz_data()
+    if "quiz_data" not in st.session_state:
+        st.session_state["quiz_data"] = [
+            {
+                "question": "この城の名前は？",
+                "options": ["姫路城", "松本城", "大阪城", "熊本城"],
+                "answer": "姫路城",
+                "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
+                "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。",
+                "points": 10  # 新しい点数フィールド
+            }
+        ]
+    for q in st.session_state["quiz_data"]:
+        if "explanation" not in q:
+            q["explanation"] = "解説がまだ追加されていません"
+        if "points" not in q:
+            q["points"] = 1  # デフォルト点数を設定
+
+# セッション状態の初期化
 for key, default in {
-    "quiz_data": [],
-    "score": 0,  # スコアの初期化
-    "current_question": 0,
     "quiz_started": False,
+    "score": 0,
+    "current_question": 0,
     "answered": False,
-    "edit_mode": False,
+    "edit_mode": False  # 編集モード
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
 
-# 固定スコア表示用のHTML
-score = st.session_state.get("score", 0)  # 安全にスコアを取得
-st.markdown(f"""
-    <div class="fixed-score">
-        現在のスコア: {score}
-    </div>
-""", unsafe_allow_html=True)
-
 # カスタムCSSの適用
 st.markdown("""
     <style>
-        .fixed-score {
-            position: fixed;
-            top: 10px;
-            left: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-            font-size: 18px;
-            font-weight: bold;
-            z-index: 1000;
-        }
         .stApp {
             background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
             background-size: cover;
@@ -60,15 +59,75 @@ st.markdown("""
             text-align: center;
             color: white;
         }
+        .custom-subtitle {
+            font-size: 40px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .fixed-buttons {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fixed-buttons button {
+            background-color: #4444FF;
+            color: white;
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid gold;
+            cursor: pointer;
+        }
+        .fixed-buttons button:hover {
+            background-color: #3333CC;
+        }
     </style>
+    <div class="fixed-buttons">
+        <form action="" method="get">
+            <button name="edit_mode_toggle" type="submit">🔧 編集モード</button>
+        </form>
+        <form action="" method="get">
+            <button name="back_to_start" type="submit">🔙 最初の画面</button>
+        </form>
+    </div>
 """, unsafe_allow_html=True)
+
+# 編集モード切り替え処理
+if "edit_mode_toggle" in st.query_params:
+    st.session_state["edit_mode"] = not st.session_state["edit_mode"]
+    st.query_params.clear()
+    st.rerun()
 
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
     st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-    st.button("▶️ クイズを開始", key="start_button", on_click=lambda: st.session_state.update({"quiz_started": True}))
-# クイズ画面
+    st.markdown("""
+        <form action="" method="get" style="text-align:center; margin-top: 50px;">
+            <button type="submit" name="start_quiz" style="
+                font-size: 36px;
+                padding: 20px 60px;
+                background-color: #28a745;
+                color: white;
+                border: 4px solid gold;
+                border-radius: 12px;
+                cursor: pointer;
+            ">
+                ▶️ クイズを開始
+            </button>
+        </form>
+    """, unsafe_allow_html=True)
+
+    if "start_quiz" in st.query_params:
+        st.session_state["quiz_started"] = True
+        st.query_params.clear()
+        st.rerun()
+# クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
@@ -92,7 +151,7 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
-                st.session_state["score"] += question["points"]  # 点数加算を安全に実行
+                st.session_state["score"] += question["points"]  # 個別点数を加算
                 st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
@@ -105,13 +164,12 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.session_state.pop("selected_option", None)
                 st.rerun()
     else:
-        # クイズ終了
-        total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 合計点数を計算
+        total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 全問題の合計点数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        st.write(f"あなたのスコア: {st.session_state['score']} / {total_points}")  # スコアを正しく表示
+        st.write(f"あなたのスコア: {st.session_state['score']} / {total_points}")  # 修正されたスコア表示
         save_quiz_data()
 
-# 編集モード
+# 編集モードページ
 elif st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
 
@@ -144,7 +202,7 @@ elif st.session_state["edit_mode"]:
     new_answer = st.selectbox("正解:", new_options, key="new_answer")
     new_image_url = st.text_input("画像URL:", key="new_image_url")
     new_explanation = st.text_area("解説:", key="new_explanation")
-    new_points = st.number_input("点数を設定:", min_value=1, max_value=100, value=1, key="new_points")  # 点数入力欄を追加
+    new_points = st.number_input("点数を設定:", min_value=1, max_value=100, value=1, key="new_points")  # 新しい問題の点数
 
     if st.button("➕ 問題を追加"):
         if new_question and all(new_options) and new_answer and new_explanation:
