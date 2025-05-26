@@ -24,7 +24,7 @@ if "quiz_data" not in st.session_state:
                 "answer": "姫路城",
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
                 "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。",
-                "points": 10  # 新しい点数フィールド
+                "points": 10  # 点数フィールドを追加
             }
         ]
     for q in st.session_state["quiz_data"]:
@@ -86,6 +86,18 @@ st.markdown("""
         .fixed-buttons button:hover {
             background-color: #3333CC;
         }
+        .fixed-score {
+            position: fixed;
+            top: 10px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 1000;
+        }
     </style>
     <div class="fixed-buttons">
         <form action="" method="get">
@@ -95,7 +107,10 @@ st.markdown("""
             <button name="back_to_start" type="submit">🔙 最初の画面</button>
         </form>
     </div>
-""", unsafe_allow_html=True)
+    <div class="fixed-score">
+        現在のスコア: {0}
+    </div>
+""".format(st.session_state["score"]), unsafe_allow_html=True)
 
 # 編集モード切り替え処理
 if "edit_mode_toggle" in st.query_params:
@@ -224,4 +239,3 @@ elif st.session_state["edit_mode"]:
         st.session_state["edit_mode"] = False  # 編集モードを解除
         st.session_state["quiz_started"] = False  # クイズ開始状態を停止
         st.rerun()
-
