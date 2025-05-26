@@ -92,7 +92,7 @@ st.markdown("""
         }
         .edit-button-container {
             position: fixed;
-            top: 50px;
+            top: 70px;
             right: 20px;
             z-index: 1000;
         }
