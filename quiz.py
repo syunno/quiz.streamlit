@@ -64,6 +64,95 @@ for key, default in {
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
+
+# カスタムCSSと固定ボタン
+st.markdown("""
+    <style>
+        .stApp {
+            background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .custom-title {
+            font-size: 64px;
+            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+            text-align: center;
+            color: white;
+        }
+        .custom-subtitle {
+            font-size: 40px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .fixed-buttons {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fixed-buttons button {
+            background-color: #4444FF;
+            color: white;
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid gold;
+            cursor: pointer;
+        }
+        .fixed-buttons button:hover {
+            background-color: #3333CC;
+        }
+    </style>
+    <div class="fixed-buttons">
+        <form action="" method="get">
+            <button name="edit_mode_toggle" type="submit">🔧 編集モード</button>
+        </form>
+        <form action="" method="get">
+            <button name="back_to_start" type="submit">🔙 最初の画面</button>
+        </form>
+    </div>
+""", unsafe_allow_html=True)
+
+# 編集モード切り替え処理
+if "edit_mode_toggle" in st.query_params:
+    st.session_state["edit_mode"] = not st.session_state["edit_mode"]
+    st.query_params.clear()
+    st.rerun()
+if "back_to_start" in st.query_params:
+    st.session_state["quiz_started"] = False
+    st.session_state["edit_mode"] = False
+    st.query_params.clear()
+    st.rerun()
+# 最初の画面
+if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
+    st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
+    st.markdown("""
+        <form action="" method="get" style="text-align:center; margin-top: 50px;">
+            <button type="submit" name="start_quiz" style="
+                font-size: 36px;
+                padding: 20px 60px;
+                background-color: #28a745;
+                color: white;
+                border: 4px solid gold;
+                border-radius: 12px;
+                cursor: pointer;
+            ">
+                ▶️ クイズを開始
+            </button>
+        </form>
+    """, unsafe_allow_html=True)
+
+    if "start_quiz" in st.query_params:
+        st.session_state["quiz_started"] = True
+        st.query_params.clear()
+        st.rerun()
+
 # クイズ画面
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
@@ -71,14 +160,12 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         question = st.session_state["quiz_data"][question_index]
         style = question.get("style", {})
 
-        # 画像表示
         if question.get("image_url"):
             try:
                 st.image(question["image_url"], width=600)
             except Exception:
                 st.warning("画像の読み込みに失敗しました。")
 
-        # 問題文の表示（スタイル適用）
         st.markdown(
             f"<p style='color:{style.get('question_color', '#ffffff')}; font-size:{style.get('question_size', '24px')};'><strong>問題: {question['question']}</strong></p>",
             unsafe_allow_html=True
@@ -86,7 +173,7 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
 
         if not st.session_state["answered"]:
             for option in question["options"]:
-                if st.button(option, key=f"option_{option}"):
+                if st.button(option, key=f"option_{option}_{question_index}"):
                     st.session_state["selected_option"] = option
                     st.session_state["answered"] = True
 
@@ -136,7 +223,6 @@ elif st.session_state["edit_mode"]:
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
         points = st.number_input("点数を設定:", min_value=1, max_value=100, value=q["points"], key=f"points_{idx}")
 
-        # スタイル編集
         style = q.get("style", {})
         question_color = st.text_input("問題文の色（例: #ffffff）", style.get("question_color", "#ffffff"), key=f"q_color_{idx}")
         question_size = st.text_input("問題文のサイズ（例: 24px）", style.get("question_size", "24px"), key=f"q_size_{idx}")
