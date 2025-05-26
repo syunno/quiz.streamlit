@@ -119,10 +119,10 @@ if "back_to_start" in st.query_params:
     st.session_state.clear()  # ← ここで完全リセット
     st.query_params.clear()
     st.rerun()
-
 # タイトル
-st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
-st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
+if not st.session_state["quiz_started"]:
+    st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
 
 # クイズ開始ボタン（最初の画面にだけ表示）
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -203,12 +203,12 @@ if st.session_state["edit_mode"]:
             st.session_state["quiz_data"][idx] = {
                 "question": question_text,
                 "options": options,
-                "answer": answer,
-                "image_url": image_url,
-                "explanation": explanation
-            }
-            save_quiz_data()
-            st.success(f"✅ 問題 {idx+1} を更新しました！")
+                "answer": answer
+                            "image_url": image_url,
+            "explanation": explanation
+        }
+        save_quiz_data()
+        st.success(f"✅ 問題 {idx+1} を更新しました！")
 
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", "", key="new_question")
@@ -234,3 +234,4 @@ if st.session_state["edit_mode"]:
     if st.button("🔙 最初の画面に戻る（編集モード内）"):
         st.session_state.clear()
         st.rerun()
+
