@@ -30,7 +30,7 @@ if "quiz_data" not in st.session_state:
         if "explanation" not in q:
             q["explanation"] = "解説がまだ追加されていません"
 
-# その他のセッション状態
+# セッション状態の初期化
 for key, default in {
     "quiz_started": False,
     "score": 0,
@@ -124,7 +124,7 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         st.session_state["quiz_started"] = True
         st.query_params.clear()
         st.rerun()
-# クイズ画面
+# クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
@@ -161,8 +161,9 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.session_state.pop("selected_option", None)
                 st.rerun()
     else:
+        total_questions = len(st.session_state["quiz_data"])  # 全体の問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        st.write(f"あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}")
+        st.write(f"あなたのスコア: {st.session_state['score']} / {total_questions}")  # 正しいスコア計算
         save_quiz_data()
 
 # 編集モードページ
