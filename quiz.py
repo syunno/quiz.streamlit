@@ -170,7 +170,7 @@ if st.button("🔧 クイズ編集モード"):
     st.rerun()
 
 if st.session_state["edit_mode"]:
-    st.markdown("<h2>📝 クイズ編集</h2>", unsafe_allow_html=True)
+    st.markdown("<h2>クイズ編集</h2>", unsafe_allow_html=True)
 
     
 
