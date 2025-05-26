@@ -184,7 +184,6 @@ if st.session_state["edit_mode"]:
         }
     </style>
     """, unsafe_allow_html=True)
-
     st.markdown("<h2>📝 クイズ編集</h2>", unsafe_allow_html=True)
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"### 問題 {idx + 1}")
