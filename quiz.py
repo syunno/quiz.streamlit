@@ -212,7 +212,6 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
 
 # 編集モード
 elif st.session_state["edit_mode"]:
-    # 編集画面のスタイル設定（初期化）
     if "editor_style" not in st.session_state:
         st.session_state["editor_style"] = {
             "label_color": "#ffffff",
@@ -231,16 +230,18 @@ elif st.session_state["edit_mode"]:
         heading_color = st.text_input("見出しの色", editor_style["heading_color"], key="editor_heading_color")
         heading_size = st.text_input("見出しのサイズ", editor_style["heading_size"], key="editor_heading_size")
 
-    if st.button("🎨 スタイルを更新"):
-        st.session_state["editor_style"] = {
-            "label_color": label_color,
-            "label_size": label_size,
-            "heading_color": heading_color,
-            "heading_size": heading_size
-        }
-        st.success("✅ 編集画面のスタイルを更新しました！")
-        st.rerun()
+        if st.button("🎨 スタイルを更新"):
+            st.session_state["editor_style"] = {
+                "label_color": label_color,
+                "label_size": label_size,
+                "heading_color": heading_color,
+                "heading_size": heading_size
+            }
+            st.success("✅ 編集画面のスタイルを更新しました！")
+            st.rerun()
 
+    def styled_label(text):
+        return f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>{text}</label>"
 
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(
@@ -248,25 +249,50 @@ elif st.session_state["edit_mode"]:
             unsafe_allow_html=True
         )
 
-        def styled_label(text):
-            return f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>{text}</label>"
+        st.markdown(styled_label("問題を編集:"), unsafe_allow_html=True)
+        question_text = st.text_input("", q["question"], key=f"question_{idx}")
 
-        question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
-        options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
-        answer = st.selectbox("正解を選択:", options, index=q["options"].index(q["answer"]), key=f"answer_{idx}")
-        image_url = st.text_input("画像URLを編集:", q["image_url"], key=f"image_url_{idx}")
-        explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
-        points = st.number_input("点数を設定:", min_value=1, max_value=100, value=q["points"], key=f"points_{idx}")
+        options = []
+        for i in range(len(q["options"])):
+            st.markdown(styled_label(f"選択肢 {i+1}:"), unsafe_allow_html=True)
+            options.append(st.text_input("", q["options"][i], key=f"option_{idx}_{i}"))
+
+        st.markdown(styled_label("正解を選択:"), unsafe_allow_html=True)
+        answer = st.selectbox("", options, index=q["options"].index(q["answer"]), key=f"answer_{idx}")
+
+        st.markdown(styled_label("画像URLを編集:"), unsafe_allow_html=True)
+        image_url = st.text_input("", q["image_url"], key=f"image_url_{idx}")
+
+        st.markdown(styled_label("解説を編集:"), unsafe_allow_html=True)
+        explanation = st.text_area("", q.get("explanation", ""), key=f"explanation_{idx}")
+
+        st.markdown(styled_label("点数を設定:"), unsafe_allow_html=True)
+        points = st.number_input("", min_value=1, max_value=100, value=q["points"], key=f"points_{idx}")
 
         style = q.get("style", {})
-        question_color = st.text_input("問題文の色（例: #ffffff）", style.get("question_color", "#ffffff"), key=f"q_color_{idx}")
-        question_size = st.text_input("問題文のサイズ（例: 24px）", style.get("question_size", "24px"), key=f"q_size_{idx}")
-        explanation_color = st.text_input("解説の色", style.get("explanation_color", "#ffffff"), key=f"e_color_{idx}")
-        explanation_size = st.text_input("解説のサイズ", style.get("explanation_size", "18px"), key=f"e_size_{idx}")
-        answer_color = st.text_input("正解メッセージの色", style.get("answer_color", "#00ff00"), key=f"a_color_{idx}")
-        answer_size = st.text_input("正解メッセージのサイズ", style.get("answer_size", "28px"), key=f"a_size_{idx}")
-        wrong_color = st.text_input("不正解メッセージの色", style.get("wrong_color", "#ff0000"), key=f"w_color_{idx}")
-        wrong_size = st.text_input("不正解メッセージのサイズ", style.get("wrong_size", "28px"), key=f"w_size_{idx}")
+        st.markdown(styled_label("問題文の色（例: #ffffff）"), unsafe_allow_html=True)
+        question_color = st.text_input("", style.get("question_color", "#ffffff"), key=f"q_color_{idx}")
+
+        st.markdown(styled_label("問題文のサイズ（例: 24px）"), unsafe_allow_html=True)
+        question_size = st.text_input("", style.get("question_size", "24px"), key=f"q_size_{idx}")
+
+        st.markdown(styled_label("解説の色"), unsafe_allow_html=True)
+        explanation_color = st.text_input("", style.get("explanation_color", "#ffffff"), key=f"e_color_{idx}")
+
+        st.markdown(styled_label("解説のサイズ"), unsafe_allow_html=True)
+        explanation_size = st.text_input("", style.get("explanation_size", "18px"), key=f"e_size_{idx}")
+
+        st.markdown(styled_label("正解メッセージの色"), unsafe_allow_html=True)
+        answer_color = st.text_input("", style.get("answer_color", "#00ff00"), key=f"a_color_{idx}")
+
+        st.markdown(styled_label("正解メッセージのサイズ"), unsafe_allow_html=True)
+        answer_size = st.text_input("", style.get("answer_size", "28px"), key=f"a_size_{idx}")
+
+        st.markdown(styled_label("不正解メッセージの色"), unsafe_allow_html=True)
+        wrong_color = st.text_input("", style.get("wrong_color", "#ff0000"), key=f"w_color_{idx}")
+
+        st.markdown(styled_label("不正解メッセージのサイズ"), unsafe_allow_html=True)
+        wrong_size = st.text_input("", style.get("wrong_size", "28px"), key=f"w_size_{idx}")
 
         if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
             st.session_state["quiz_data"][idx] = {
