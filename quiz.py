@@ -119,7 +119,7 @@ if "back_to_start" in st.query_params:
     st.session_state.clear()  # ← ここで完全リセット
     st.query_params.clear()
     st.rerun()
-# タイトル
+# タイトル（最初の画面にのみ表示）
 if not st.session_state["quiz_started"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
     st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
