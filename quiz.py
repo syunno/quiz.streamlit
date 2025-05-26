@@ -114,23 +114,18 @@ st.markdown("""
             color: black;
         }
         
-/* ラジオボタンのラベルを白に */
-        div[role="radiogroup"] label {
+/* ラジオボタンの隣の文字を白にする */
+        div[role="radiogroup"] label span {
             color: white !important;
             font-weight: bold;
         }
+
+        /* 念のため、他の構造にも対応 */
+        div[role="radiogroup"] label div {
+            color: white !important;
+        }
+
         
-/* ラジオボタンの選択肢の文字色を白に */
-        div[role="radiogroup"] > label > div {
-            color: white !important;
-        }
-
-        /* 追加のセレクタ（Streamlitのバージョンによって異なる場合に備えて） */
-        div[role="radiogroup"] label span {
-            color: white !important;
-        }
-    
-
 
     </style>
 """, unsafe_allow_html=True)
