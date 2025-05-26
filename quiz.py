@@ -36,8 +36,7 @@ for key, default in {
     "score": 0,
     "current_question": 0,
     "answered": False,
-    "edit_mode": False,
-    "start_quiz_clicked": False
+    "edit_mode": False  # 編集モード
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -63,20 +62,6 @@ st.markdown("""
             margin-bottom: 20px;
             text-align: center;
         }
-        .custom-text {
-            font-size: 24px;
-            line-height: 1.6;
-            text-align: justify;
-            color: white;
-        }
-        h2 {
-            color: white !important;
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
-        }
-        label {
-            color: white !important;
-            font-weight: bold;
-        }
         .fixed-buttons {
             position: fixed;
             top: 70px;
@@ -101,16 +86,22 @@ st.markdown("""
     </style>
     <div class="fixed-buttons">
         <form action="" method="get">
-            <button name="edit_mode_toggle" type="submit">🔧 クイズ編集モード</button>
+            <button name="edit_mode_toggle" type="submit">🔧 編集モード</button>
         </form>
         <form action="" method="get">
-            <button name="back_to_start" type="submit">🔙 最初の画面に戻る</button>
+            <button name="back_to_start" type="submit">🔙 最初の画面</button>
         </form>
     </div>
 """, unsafe_allow_html=True)
 
+# 編集モード切り替え処理
+if "edit_mode_toggle" in st.query_params:
+    st.session_state["edit_mode"] = not st.session_state["edit_mode"]
+    st.query_params.clear()
+    st.rerun()
+
 # 最初の画面
-if not st.session_state["quiz_started"]:
+if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
     st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
     st.markdown("""
@@ -133,8 +124,8 @@ if not st.session_state["quiz_started"]:
         st.session_state["quiz_started"] = True
         st.query_params.clear()
         st.rerun()
-# クイズのページ
-if st.session_state["quiz_started"]:
+# クイズ画面
+if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
@@ -174,10 +165,11 @@ if st.session_state["quiz_started"]:
         st.write(f"あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}")
         save_quiz_data()
 
-# 編集モード画面
-if st.session_state["edit_mode"]:
+# 編集モードページ
+elif st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
 
+    # 各問題の編集セクション
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"<h3>問題 {idx + 1}</h3>", unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
@@ -197,7 +189,7 @@ if st.session_state["edit_mode"]:
             save_quiz_data()
             st.success(f"✅ 問題 {idx + 1} を更新しました！")
 
-    # 新しい問題追加フォーム
+    # 新しい問題の追加セクション
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", key="new_question")
     new_options = [st.text_input(f"選択肢 {i + 1}:", key=f"new_option_{i}") for i in range(4)]
@@ -219,7 +211,8 @@ if st.session_state["edit_mode"]:
         else:
             st.error("⚠️ 必須項目をすべて入力してください！")
 
-    if st.button("🔙 最初の画面に戻る（編集モード内）"):
-        st.session_state["quiz_started"] = False  # 編集モードから最初の画面に戻る
+    # 最初の画面に戻るボタン
+    if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False  # 編集モードを解除
+        st.session_state["quiz_started"] = False  # クイズ開始状態を停止
         st.rerun()
