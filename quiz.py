@@ -56,7 +56,7 @@ if "edit_mode" not in st.session_state:
 st.markdown("""
     <style>
         .stApp {
-            background-image: url("https://www.transparenttextures.com/patterns/washi.png");
+            background-image: url("back.png");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
