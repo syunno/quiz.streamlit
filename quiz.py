@@ -212,10 +212,34 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
 
 # 編集モード
 elif st.session_state["edit_mode"]:
+    # 編集画面のスタイル設定（初期化）
+    if "editor_style" not in st.session_state:
+        st.session_state["editor_style"] = {
+            "label_color": "#ffffff",
+            "label_size": "16px",
+            "heading_color": "#ffcc00",
+            "heading_size": "24px"
+        }
+
+    editor_style = st.session_state["editor_style"]
+
     st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
 
+    with st.expander("⚙️ 編集画面のスタイル設定", expanded=False):
+        editor_style["label_color"] = st.text_input("ラベルの色（例: #ffffff）", editor_style["label_color"])
+        editor_style["label_size"] = st.text_input("ラベルのサイズ（例: 16px）", editor_style["label_size"])
+        editor_style["heading_color"] = st.text_input("見出しの色", editor_style["heading_color"])
+        editor_style["heading_size"] = st.text_input("見出しのサイズ", editor_style["heading_size"])
+
     for idx, q in enumerate(st.session_state["quiz_data"]):
-        st.markdown(f"<h3>問題 {idx + 1}</h3>", unsafe_allow_html=True)
+        st.markdown(
+            f"<h3 style='color:{editor_style['heading_color']}; font-size:{editor_style['heading_size']};'>問題 {idx + 1}</h3>",
+            unsafe_allow_html=True
+        )
+
+        def styled_label(text):
+            return f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>{text}</label>"
+
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
         answer = st.selectbox("正解を選択:", options, index=q["options"].index(q["answer"]), key=f"answer_{idx}")
@@ -254,3 +278,8 @@ elif st.session_state["edit_mode"]:
             }
             save_quiz_data()
             st.success(f"✅ 問題 {idx + 1} を更新しました！")
+
+    if st.button("🔙 最初の画面に戻る"):
+        st.session_state["edit_mode"] = False
+        st.session_state["quiz_started"] = False
+        st.rerun()
