@@ -113,6 +113,13 @@ st.markdown("""
         .stSelectbox div[data-baseweb="select"] {
             color: black;
         }
+        
+/* ラジオボタンのラベルを白に */
+        div[role="radiogroup"] label {
+            color: white !important;
+            font-weight: bold;
+        }
+
     </style>
 """, unsafe_allow_html=True)
 
