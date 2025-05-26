@@ -189,7 +189,7 @@ if st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集</h2>", unsafe_allow_html=True)
 
     for idx, q in enumerate(st.session_state["quiz_data"]):
-        st.markdown(f"<h2>### 問題 {idx + 1}<h2>"unsafe_allow_html=True)
+        st.markdown(f"<h2>### 問題 {idx + 1}<h2>",unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
         answer = st.selectbox("正解を選択:", options, index=q["options"].index(q["answer"]), key=f"answer_{idx}")
