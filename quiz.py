@@ -36,7 +36,7 @@ if "quiz_data" not in st.session_state:
 # セッション状態を安全に初期化
 for key, default in {
     "quiz_started": False,
-    "score": 0,
+    "score": 0,  # スコアを初期化
     "current_question": 0,
     "answered": False,
     "edit_mode": False  # 編集モード
@@ -73,9 +73,9 @@ st.markdown("""
         }
     </style>
     <div class="fixed-score">
-        現在のスコア: {0}
+        現在のスコア: {score}
     </div>
-""".format(st.session_state["score"]), unsafe_allow_html=True)
+""".format(score=st.session_state["score"]), unsafe_allow_html=True)
 
 # 編集モード切り替え処理
 if "edit_mode_toggle" in st.query_params:
@@ -107,13 +107,13 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         st.session_state["quiz_started"] = True
         st.query_params.clear()
         st.rerun()
-# クイズのページ
+# クイズ画面
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
 
-        # 画像表示（エラー対策付き）
+        # 画像の表示（エラー対策付き）
         if question.get("image_url"):
             try:
                 st.image(question["image_url"], width=600)
@@ -122,34 +122,38 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
 
         st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
 
+        # 回答ボタン
         if not st.session_state["answered"]:
             for option in question["options"]:
                 if st.button(option, key=f"option_{option}"):
                     st.session_state["selected_option"] = option
                     st.session_state["answered"] = True
 
+        # 正誤判定
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
-                st.session_state["score"] += question["points"]  # 個別点数を加算
+                st.session_state["score"] += question["points"]  # 問題点数を加算
                 st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
 
             st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
 
+            # 次の問題ボタン
             if st.button("次の問題へ"):
                 st.session_state["current_question"] += 1
                 st.session_state["answered"] = False
                 st.session_state.pop("selected_option", None)
                 st.rerun()
     else:
-        total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 全問題の合計点数を取得
+        # クイズ終了画面
+        total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 合計点数を計算
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        st.write(f"あなたのスコア: {st.session_state['score']} / {total_points}")  # 修正されたスコア表示
+        st.write(f"あなたのスコア: {st.session_state['score']} / {total_points}")  # 正しいスコアを表示
         save_quiz_data()
 
-# 編集モードページ
+# 編集モード画面
 elif st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
 
@@ -175,7 +179,7 @@ elif st.session_state["edit_mode"]:
             save_quiz_data()
             st.success(f"✅ 問題 {idx + 1} を更新しました！")
 
-    # 新しい問題の追加セクション
+    # 新しい問題の追加
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", key="new_question")
     new_options = [st.text_input(f"選択肢 {i + 1}:", key=f"new_option_{i}") for i in range(4)]
