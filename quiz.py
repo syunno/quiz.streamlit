@@ -206,7 +206,7 @@ if st.session_state["edit_mode"]:
                 "answer": answer
                 "image_url": image_url,
                 "explanation": explanation
-        }
+            }
         save_quiz_data()
         st.success(f"✅ 問題 {idx+1} を更新しました！")
 
