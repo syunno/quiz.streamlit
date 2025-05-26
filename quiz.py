@@ -92,21 +92,6 @@ st.markdown("""
             background-color: #0000FF;
             transform: scale(1.05);
         }
-        /* テキスト入力欄の文字色を赤に */
-        .stTextInput input {
-            color: red;
-            font-weight: bold;
-        }
-
-        /* セレクトボックスの文字色を青に */
-        .stSelectbox div[data-baseweb="select"] {
-            color: blue;
-        }
-
-        /* テキストエリアの文字色を緑に */
-        .stTextArea textarea {
-            color: green;
-        }
 
     </style>
 """, unsafe_allow_html=True)
@@ -164,6 +149,26 @@ if st.button("🔧 クイズ編集モード"):
     st.rerun()
 
 if st.session_state["edit_mode"]:
+    st.markdown("""
+    <style>
+        /* テキスト入力欄の文字色を赤に */
+        .stTextInput input {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* セレクトボックスの文字色を青に */
+        .stSelectbox div[data-baseweb="select"] {
+            color: blue;
+        }
+
+        /* テキストエリアの文字色を緑に */
+        .stTextArea textarea {
+            color: green;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.markdown("<h2>📝 クイズ編集</h2>", unsafe_allow_html=True)
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"### 問題 {idx + 1}")
