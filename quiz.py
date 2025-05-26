@@ -41,7 +41,7 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# カスタムCSSと右上固定ボタン
+# カスタムCSSと右上固定ボタン＋開始ボタン拡大
 st.markdown("""
     <style>
         .stApp {
@@ -82,6 +82,18 @@ st.markdown("""
             background-color: #0000AA;
             transform: scale(1.05);
         }
+        .start-button > button {
+            font-size: 32px !important;
+            padding: 20px 40px !important;
+            background-color: #28a745 !important;
+            color: white !important;
+            border-radius: 10px !important;
+            border: 3px solid gold !important;
+        }
+        .start-button > button:hover {
+            background-color: #218838 !important;
+            transform: scale(1.1);
+        }
         h2 {
             color: white !important;
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
@@ -92,7 +104,7 @@ st.markdown("""
         }
         .fixed-buttons {
             position: fixed;
-            top: 70px;
+            top: 20px;
             right: 20px;
             z-index: 1000;
             display: flex;
@@ -143,10 +155,12 @@ st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機�
 
 # クイズ開始
 if not st.session_state["quiz_started"]:
+    st.markdown('<div class="start-button">', unsafe_allow_html=True)
     if st.button("クイズを開始"):
         st.session_state["edit_mode"] = False
         st.session_state["quiz_started"] = True
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 elif not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
@@ -233,3 +247,4 @@ if st.session_state["edit_mode"]:
     if st.button("🔙 最初の画面に戻る（編集モード内）"):
         st.session_state["edit_mode"] = False
         st.rerun()
+
