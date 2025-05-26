@@ -170,8 +170,8 @@ if st.session_state["quiz_started"]:
                 st.session_state.pop("selected_option", None)
                 st.rerun()
     else:
-        st.markdown("<h2>クイズ終了！🎉</h2>", unsafe_allow_html=True)
-        st.write(f"<h2>あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}</h2>", unsafe_allow_html=True)
+        st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
+        st.write(f"あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}")
         save_quiz_data()
 
 # 編集モード画面
