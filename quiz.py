@@ -115,16 +115,6 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
-st.markdown(f'<p style="color:#FFD700; font-size:28px;"><strong>問題: {question["question"]}</strong></p>', unsafe_allow_html=True)
-st.markdown("""
-    <style>
-        .stRadio > div {
-            color: #00FFFF;  /* シアン */
-            font-size: 20px;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 
 
 # **タイトルセクション**
