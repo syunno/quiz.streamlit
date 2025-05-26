@@ -293,6 +293,82 @@ elif st.session_state["edit_mode"]:
 
         st.markdown(styled_label("不正解メッセージのサイズ"), unsafe_allow_html=True)
         wrong_size = st.text_input("", style.get("wrong_size", "28px"), key=f"w_size_{idx}")
+            # 新しい問題の追加セクション
+    st.markdown(
+        f"<h3 style='color:{editor_style['heading_color']}; font-size:{editor_style['heading_size']};'>➕ 新しい問題を追加</h3>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown(styled_label("新しい問題:"), unsafe_allow_html=True)
+    new_question = st.text_input("", key="new_question")
+
+    new_options = []
+    for i in range(4):
+        st.markdown(styled_label(f"選択肢 {i + 1}:"), unsafe_allow_html=True)
+        new_options.append(st.text_input("", key=f"new_option_{i}"))
+
+    st.markdown(styled_label("正解:"), unsafe_allow_html=True)
+    new_answer = st.selectbox("", new_options, key="new_answer")
+
+    st.markdown(styled_label("画像URL:"), unsafe_allow_html=True)
+    new_image_url = st.text_input("", key="new_image_url")
+
+    st.markdown(styled_label("解説:"), unsafe_allow_html=True)
+    new_explanation = st.text_area("", key="new_explanation")
+
+    st.markdown(styled_label("点数を設定:"), unsafe_allow_html=True)
+    new_points = st.number_input("", min_value=1, max_value=100, value=1, key="new_points")
+
+    # スタイル設定
+    st.markdown(styled_label("問題文の色"), unsafe_allow_html=True)
+    new_q_color = st.text_input("", "#ffffff", key="new_q_color")
+
+    st.markdown(styled_label("問題文のサイズ"), unsafe_allow_html=True)
+    new_q_size = st.text_input("", "24px", key="new_q_size")
+
+    st.markdown(styled_label("解説の色"), unsafe_allow_html=True)
+    new_e_color = st.text_input("", "#ffffff", key="new_e_color")
+
+    st.markdown(styled_label("解説のサイズ"), unsafe_allow_html=True)
+    new_e_size = st.text_input("", "18px", key="new_e_size")
+
+    st.markdown(styled_label("正解メッセージの色"), unsafe_allow_html=True)
+    new_a_color = st.text_input("", "#00ff00", key="new_a_color")
+
+    st.markdown(styled_label("正解メッセージのサイズ"), unsafe_allow_html=True)
+    new_a_size = st.text_input("", "28px", key="new_a_size")
+
+    st.markdown(styled_label("不正解メッセージの色"), unsafe_allow_html=True)
+    new_w_color = st.text_input("", "#ff0000", key="new_w_color")
+
+    st.markdown(styled_label("不正解メッセージのサイズ"), unsafe_allow_html=True)
+    new_w_size = st.text_input("", "28px", key="new_w_size")
+
+    if st.button("➕ 問題を追加"):
+        if new_question and all(new_options) and new_answer and new_explanation:
+            st.session_state["quiz_data"].append({
+                "question": new_question,
+                "options": new_options,
+                "answer": new_answer,
+                "image_url": new_image_url,
+                "explanation": new_explanation,
+                "points": new_points,
+                "style": {
+                    "question_color": new_q_color,
+                    "question_size": new_q_size,
+                    "explanation_color": new_e_color,
+                    "explanation_size": new_e_size,
+                    "answer_color": new_a_color,
+                    "answer_size": new_a_size,
+                    "wrong_color": new_w_color,
+                    "wrong_size": new_w_size
+                }
+            })
+            save_quiz_data()
+            st.success("✅ 新しい問題を追加しました！")
+        else:
+            st.error("⚠️ 必須項目をすべて入力してください！")
+
 
         if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
             st.session_state["quiz_data"][idx] = {
