@@ -52,7 +52,7 @@ if not st.session_state["quiz_started"]:
                 font-size: 36px;
                 padding: 20px 60px;
                 background-color: #28a745;
-                color: white;
+                color: #000000;
                 border: 4px solid gold;
                 border-radius: 12px;
                 cursor: pointer;
