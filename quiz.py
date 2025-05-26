@@ -1,59 +1,60 @@
+# 必要なライブラリをインポート
 import streamlit as st
 import json
 from pathlib import Path
 
-# データ保存関数
+# **データ保存関数**
 def save_quiz_data():
+    """
+    現在のクイズデータをJSONファイルに保存する関数
+    """
     with open("quiz_data.json", "w", encoding="utf-8") as f:
         json.dump(st.session_state["quiz_data"], f, ensure_ascii=False)
 
-# データロード関数
+# **データロード関数**
 def load_quiz_data():
+    """
+    JSONファイルからクイズデータをロードする関数。
+    ファイルが存在する場合のみデータをロード。
+    """
     if Path("quiz_data.json").exists():
         with open("quiz_data.json", "r", encoding="utf-8") as f:
             st.session_state["quiz_data"] = json.load(f)
 
-# セッション初期化
+# **セッション初期化**
 if "quiz_data" not in st.session_state:
     load_quiz_data()
-    if "quiz_data" not in st.session_state:
+    if "quiz_data" not in st.session_state:  # ファイルがない場合の初期データ
         st.session_state["quiz_data"] = [
-            {
-                "question": "この城の名前は？",
-                "options": ["姫路城", "松本城", "大阪城", "熊本城"],
-                "answer": "姫路城",
-                "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
-                "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。"
+            {"question": "この城の名前は？", "options": ["姫路城", "松本城", "大阪城", "熊本城"], 
+             "answer": "姫路城", "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
+             "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。"
             },
-            {
-                "question": "この花の名前は？",
-                "options": ["梅", "桜", "牡丹", "藤"],
-                "answer": "桜",
-                "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Japanese_Sakura.JPG/800px-Japanese_Sakura.JPG",
-                "explanation": "桜は日本の象徴的な花で、春の訪れを知らせる風物詩です。"
+            {"question": "この花の名前は？", "options": ["梅", "桜", "牡丹", "藤"], 
+             "answer": "桜", "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Japanese_Sakura.JPG/800px-Japanese_Sakura.JPG",
+             "explanation": "桜は日本の象徴的な花で、春の訪れを知らせる風物詩です。"
             }
         ]
+    # デフォルト値を補完（explanation キーがない場合）
     for q in st.session_state["quiz_data"]:
         if "explanation" not in q:
             q["explanation"] = "解説がまだ追加されていません"
 
 # セッション状態の管理
-for key, default in {
-    "quiz_started": False,
-    "score": 0,
-    "current_question": 0,
-    "answered": False,
-    "edit_mode": False
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = default
+if "quiz_started" not in st.session_state:
+    st.session_state["quiz_started"] = False
+if "score" not in st.session_state:
+    st.session_state["score"] = 0
+if "current_question" not in st.session_state:
+    st.session_state["current_question"] = 0
+if "answered" not in st.session_state:
+    st.session_state["answered"] = False
+if "edit_mode" not in st.session_state:
+    st.session_state["edit_mode"] = False
 
-# カスタムCSS（文字色を白に統一）
+# **カスタムCSS**
 st.markdown("""
     <style>
-        html, body, [class*="css"] {
-            color: white !important;
-        }
         .stApp {
             background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
             background-size: cover;
@@ -61,19 +62,19 @@ st.markdown("""
             background-attachment: fixed;
         }
         .custom-title {
-            font-size: 64px;
+            font-size: 64px;  /* タイトル用フォントサイズ */
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
             text-align: center;
             color: white;
         }
         .custom-subtitle {
-            font-size: 40px;
+            font-size: 40px;  /* サブタイトル用フォントサイズ */
             color: white;
             margin-bottom: 20px;
             text-align: center;
         }
         .custom-text {
-            font-size: 24px;
+            font-size: 24px;  /* 解説用フォントサイズ */
             line-height: 1.6;
             text-align: justify;
             color: white;
@@ -91,17 +92,13 @@ st.markdown("""
             background-color: #0000FF;
             transform: scale(1.05);
         }
-        .stRadio > div > label, .stSelectbox > div, .stTextInput input, .stTextArea textarea {
-            color: white !important;
-        }
     </style>
 """, unsafe_allow_html=True)
 
-# タイトルセクション
+# **タイトルセクション**
 st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-
-# クイズ開始ボタン
+# **クイズ開始ボタン**
 if not st.session_state["quiz_started"]:
     if st.button("クイズを開始"):
         st.session_state["edit_mode"] = False
@@ -122,25 +119,30 @@ elif not st.session_state["edit_mode"]:
                 st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
+            
+                        # 解説を表示
             st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
 
+        # 次の問題に進むボタン
         if st.session_state["answered"]:
             if st.button("次の問題へ"):
                 st.session_state["current_question"] += 1
                 st.session_state["answered"] = False
                 st.rerun()
     else:
+        # クイズ終了画面
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
         st.write(f"あなたのスコア: {st.session_state['score']} / {len(st.session_state['quiz_data'])}")
         save_quiz_data()
+
+        # 最初の画面に戻るボタン
         if st.button("🔙 最初の画面に戻る"):
             st.session_state["quiz_started"] = False
             st.session_state["score"] = 0
             st.session_state["current_question"] = 0
             st.session_state["answered"] = False
             st.rerun()
-
-# クイズ編集モード
+# **クイズ編集モード**
 if st.button("🔧 クイズ編集モード"):
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     st.rerun()
@@ -166,6 +168,7 @@ if st.session_state["edit_mode"]:
             save_quiz_data()
             st.success(f"✅ 問題 {idx+1} を更新しました！")
 
+    # 新しい問題を追加
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", "", key="new_question")
     new_options = [st.text_input(f"新しい選択肢 {i+1}:", "", key=f"new_option_{i}") for i in range(4)]
@@ -175,13 +178,6 @@ if st.session_state["edit_mode"]:
 
     if st.button("➕ 問題を追加"):
         if new_question and all(new_options) and new_answer and new_explanation:
-            st.session_state["quiz_data"].append({
-                "question": new_question,
-                "options": new_options,
-                "answer": new_answer,
-                "image_url": new_image_url,
-                "explanation": new_explanation
-            })
             st.session_state["quiz_data"].append({
                 "question": new_question,
                 "options": new_options,
