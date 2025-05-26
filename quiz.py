@@ -1,4 +1,3 @@
-# 必要なライブラリをインポート
 import streamlit as st
 import json
 from pathlib import Path
@@ -19,13 +18,19 @@ if "quiz_data" not in st.session_state:
     load_quiz_data()
     if "quiz_data" not in st.session_state:
         st.session_state["quiz_data"] = [
-            {"question": "この城の名前は？", "options": ["姫路城", "松本城", "大阪城", "熊本城"], 
-             "answer": "姫路城", "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
-             "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。"
+            {
+                "question": "この城の名前は？",
+                "options": ["姫路城", "松本城", "大阪城", "熊本城"],
+                "answer": "姫路城",
+                "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
+                "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。"
             },
-            {"question": "この花の名前は？", "options": ["梅", "桜", "牡丹", "藤"], 
-             "answer": "桜", "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Japanese_Sakura.JPG/800px-Japanese_Sakura.JPG",
-             "explanation": "桜は日本の象徴的な花で、春の訪れを知らせる風物詩です。"
+            {
+                "question": "この花の名前は？",
+                "options": ["梅", "桜", "牡丹", "藤"],
+                "answer": "桜",
+                "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Japanese_Sakura.JPG/800px-Japanese_Sakura.JPG",
+                "explanation": "桜は日本の象徴的な花で、春の訪れを知らせる風物詩です。"
             }
         ]
     for q in st.session_state["quiz_data"]:
@@ -173,7 +178,10 @@ if st.session_state["edit_mode"]:
             st.session_state["quiz_data"].append({
                 "question": new_question,
                 "options": new_options,
-                "answer": new
+                "answer": new_answer,
+                "image_url": new_image_url,
+                "explanation": new_explanation
+            })
             st.session_state["quiz_data"].append({
                 "question": new_question,
                 "options": new_options,
@@ -190,4 +198,3 @@ if st.session_state["edit_mode"]:
     if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False
         st.rerun()
-
