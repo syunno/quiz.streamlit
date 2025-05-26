@@ -203,7 +203,7 @@ if st.session_state["edit_mode"]:
             st.session_state["quiz_data"][idx] = {
                 "question": question_text,
                 "options": options,
-                "answer": answer
+                "answer": answer,
                 "image_url": image_url,
                 "explanation": explanation
             }
