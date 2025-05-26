@@ -24,7 +24,7 @@ if "quiz_data" not in st.session_state:
                 "answer": "姫路城",
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
                 "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。",
-                "points": 10  # 点数フィールドを追加
+                "points": 10  # 新しく点数フィールドを追加
             }
         ]
     for q in st.session_state["quiz_data"]:
@@ -33,7 +33,7 @@ if "quiz_data" not in st.session_state:
         if "points" not in q:
             q["points"] = 1  # デフォルト点数を設定
 
-# セッション状態の初期化
+# セッション状態を安全に初期化
 for key, default in {
     "quiz_started": False,
     "score": 0,
@@ -44,7 +44,7 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# カスタムCSSの適用
+# スコアの固定表示とカスタムCSS
 st.markdown("""
     <style>
         .stApp {
@@ -59,33 +59,6 @@ st.markdown("""
             text-align: center;
             color: white;
         }
-        .custom-subtitle {
-            font-size: 40px;
-            color: white;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .fixed-buttons {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .fixed-buttons button {
-            background-color: #4444FF;
-            color: white;
-            font-size: 18px;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: 2px solid gold;
-            cursor: pointer;
-        }
-        .fixed-buttons button:hover {
-            background-color: #3333CC;
-        }
         .fixed-score {
             position: fixed;
             top: 10px;
@@ -99,14 +72,6 @@ st.markdown("""
             z-index: 1000;
         }
     </style>
-    <div class="fixed-buttons">
-        <form action="" method="get">
-            <button name="edit_mode_toggle" type="submit">🔧 編集モード</button>
-        </form>
-        <form action="" method="get">
-            <button name="back_to_start" type="submit">🔙 最初の画面</button>
-        </form>
-    </div>
     <div class="fixed-score">
         現在のスコア: {0}
     </div>
