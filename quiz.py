@@ -24,14 +24,14 @@ if "quiz_data" not in st.session_state:
                 "answer": "姫路城",
                 "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Himeji_Castle_looking_up.jpg/800px-Himeji_Castle_looking_up.jpg",
                 "explanation": "姫路城は日本三名城の一つで、別名白鷺城とも呼ばれています。",
-                "points": 10
+                "points": 10  # 新しい点数フィールド
             }
         ]
     for q in st.session_state["quiz_data"]:
         if "explanation" not in q:
             q["explanation"] = "解説がまだ追加されていません"
         if "points" not in q:
-            q["points"] = 1
+            q["points"] = 1  # デフォルト点数を設定
 
 # セッション状態の初期化
 for key, default in {
@@ -39,7 +39,7 @@ for key, default in {
     "score": 0,
     "current_question": 0,
     "answered": False,
-    "edit_mode": False
+    "edit_mode": False  # 編集モード
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -96,6 +96,7 @@ st.markdown("""
         </form>
     </div>
 """, unsafe_allow_html=True)
+
 # 編集モード切り替え処理
 if "edit_mode_toggle" in st.query_params:
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
@@ -126,7 +127,6 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         st.session_state["quiz_started"] = True
         st.query_params.clear()
         st.rerun()
-
 # クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
@@ -151,7 +151,7 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
-                st.session_state["score"] += question["points"]
+                st.session_state["score"] += question["points"]  # 個別点数を加算
                 st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
@@ -164,9 +164,10 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.session_state.pop("selected_option", None)
                 st.rerun()
     else:
-        total_points = sum(q["points"] for q in st.session_state["quiz_data"])
+        total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        st.write(f"あなたのスコア: {st.session_state['score']} / {total_points}")
+        total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 合計点数の計算を追加
+        st.write(f"あなたのスコア: {st.session_state['current_question']} / {total_questions}")  # 問題数ベースのスコア表示
         save_quiz_data()
 
 # 編集モードページ
@@ -181,7 +182,7 @@ elif st.session_state["edit_mode"]:
         answer = st.selectbox("正解を選択:", options, index=q["options"].index(q["answer"]), key=f"answer_{idx}")
         image_url = st.text_input("画像URLを編集:", q["image_url"], key=f"image_url_{idx}")
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
-        points = st.number_input("点数を設定:", min_value=1, max_value=100, value=q["points"], key=f"points_{idx}")
+        points = st.number_input("点数を設定:", min_value=1, max_value=100, value=q["points"], key=f"points_{idx}")  # 点数入力欄を追加
 
         if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
             st.session_state["quiz_data"][idx] = {
@@ -190,7 +191,7 @@ elif st.session_state["edit_mode"]:
                 "answer": answer,
                 "image_url": image_url,
                 "explanation": explanation,
-                "points": points,
+                "points": points,  # 点数を保存
             }
             save_quiz_data()
             st.success(f"✅ 問題 {idx + 1} を更新しました！")
@@ -202,7 +203,7 @@ elif st.session_state["edit_mode"]:
     new_answer = st.selectbox("正解:", new_options, key="new_answer")
     new_image_url = st.text_input("画像URL:", key="new_image_url")
     new_explanation = st.text_area("解説:", key="new_explanation")
-    new_points = st.number_input("点数を設定:", min_value=1, max_value=100, value=1, key="new_points")
+    new_points = st.number_input("点数を設定:", min_value=1, max_value=100, value=1, key="new_points")  # 新しい問題の点数
 
     if st.button("➕ 問題を追加"):
         if new_question and all(new_options) and new_answer and new_explanation:
@@ -212,7 +213,7 @@ elif st.session_state["edit_mode"]:
                 "answer": new_answer,
                 "image_url": new_image_url,
                 "explanation": new_explanation,
-                "points": new_points,
+                "points": new_points,  # 点数を保存
             })
             save_quiz_data()
             st.success("✅ 新しい問題を追加しました！")
@@ -221,8 +222,5 @@ elif st.session_state["edit_mode"]:
 
     # 最初の画面に戻るボタン
     if st.button("🔙 最初の画面に戻る"):
-        st.session_state["edit_mode"] = False
-        st.session_state["quiz_started"] = False
-        st.rerun()
-
-        st.rerun()
+        st.session_state["edit_mode"] = False  # 編集モードを解除
+        st.session_state["quiz_started"] = False  # クイズ開始状態を停止
