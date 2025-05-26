@@ -151,18 +151,23 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
-                st.session_state["score"] += question["points"]  # 個別点数を加算
+                # スコア加算は一回のみ確実に実行
+                if "score_updated" not in st.session_state or not st.session_state["score_updated"]:
+                    st.session_state["score"] += question["points"]  # 正解時にのみ加算
+                    st.session_state["score_updated"] = True  # 加算済みフラグを設定
                 st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
-
+        
             st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
-
+        
             if st.button("次の問題へ"):
                 st.session_state["current_question"] += 1
                 st.session_state["answered"] = False
+                st.session_state["score_updated"] = False  # フラグをリセット
                 st.session_state.pop("selected_option", None)
                 st.rerun()
+
     else:
         total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
