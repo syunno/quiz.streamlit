@@ -207,7 +207,7 @@ if st.session_state["edit_mode"]:
             save_quiz_data()
             st.success(f"✅ 問題 {idx+1} を更新しました！")
 
-    st.markdown("### ➕ 新しい問題を追加")
+    st.markdown("<h2>➕ 新しい問題を追加<h2>",unsafe_allow_html=True)
     new_question = st.text_input("新しい問題:", "", key="new_question")
     new_options = [st.text_input(f"新しい選択肢 {i+1}:", "", key=f"new_option_{i}") for i in range(4)]
     new_answer = st.selectbox("新しい正解:", new_options, key="new_answer")
