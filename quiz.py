@@ -56,7 +56,7 @@ if "edit_mode" not in st.session_state:
 st.markdown("""
     <style>
         .stApp {
-            background-image: url("back.png");
+            background-image: url("https://png.pngtree.com/thumb_back/fw800/background/20191123/pngtree-technology-blue-data-background-image_323014.jpg");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
