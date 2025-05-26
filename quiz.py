@@ -116,12 +116,12 @@ st.markdown("""
 query_params = st.query_params
 if "edit_mode_toggle" in query_params:
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.set_query_params()  # クエリパラメータをクリア
+    st.set_query_params({})  # クエリパラメータをクリア
     st.experimental_rerun()
 if "back_to_start" in query_params:
     st.session_state["quiz_started"] = False
     st.session_state["edit_mode"] = False
-    st.set_query_params()  # クエリパラメータをクリア
+    st.set_query_params({})  # クエリパラメータをクリア
     st.experimental_rerun()
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -144,7 +144,7 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     """, unsafe_allow_html=True)
     if "start_quiz" in query_params:
         st.session_state["quiz_started"] = True
-        st.set_query_params()  # クエリパラメータをクリア
+        st.set_query_params({})  # クエリパラメータをクリア
         st.experimental_rerun()
 # クイズ画面
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -294,7 +294,7 @@ elif st.session_state["edit_mode"]:
                 q["style"].update(bulk_styles)
             save_quiz_data()
             st.success("✅ 一括スタイルをすべての問題に適用しました！")
-            st.set_query_params()  # クエリパラメータのクリア
+            st.set_query_params({})  # クエリパラメータをクリア
             st.experimental_rerun()
     # 編集画面のスタイル設定
     with st.expander("⚙️ 編集画面のスタイル設定", expanded=False):
@@ -329,7 +329,7 @@ elif st.session_state["edit_mode"]:
                 }
                 save_quiz_data()
                 st.success("✅ 編集画面のスタイルを更新しました！")
-                st.set_query_params()  # クエリパラメータのクリア
+                st.set_query_params({})  # クエリパラメータをクリア
                 st.experimental_rerun()
     def styled_label(text):
         return f"<label style='color:{editor_style['label_color']}; font-size:{editor_style['label_size']};'>{text}</label>"
@@ -378,21 +378,21 @@ elif st.session_state["edit_mode"]:
                 errors.append(f"問題 {idx + 1}: すべての選択肢を入力してください。")
             if not explanation:
                 errors.append(f"問題 {idx + 1}: 解説を入力してください。")
-            if not is_valid_color(question_color):
+            if not (question_color.startswith("#") and (len(question_color) == 7 or len(question_color) == 4)):
                 errors.append(f"問題 {idx + 1}: 問題文の色が無効です。例: #ffffff")
-            if not question_size.endswith("px") or not question_size[:-2].isdigit():
+            if not (question_size.endswith("px") and question_size[:-2].isdigit()):
                 errors.append(f"問題 {idx + 1}: 問題文のサイズが無効です。例: 24px")
-            if not is_valid_color(explanation_color):
+            if not (explanation_color.startswith("#") and (len(explanation_color) == 7 or len(explanation_color) == 4)):
                 errors.append(f"問題 {idx + 1}: 解説の色が無効です。例: #ffffff")
-            if not explanation_size.endswith("px") or not explanation_size[:-2].isdigit():
+            if not (explanation_size.endswith("px") and explanation_size[:-2].isdigit()):
                 errors.append(f"問題 {idx + 1}: 解説のサイズが無効です。例: 18px")
-            if not is_valid_color(answer_color):
+            if not (answer_color.startswith("#") and (len(answer_color) == 7 or len(answer_color) == 4)):
                 errors.append(f"問題 {idx + 1}: 正解メッセージの色が無効です。例: #00ff00")
-            if not answer_size.endswith("px") or not answer_size[:-2].isdigit():
+            if not (answer_size.endswith("px") and answer_size[:-2].isdigit()):
                 errors.append(f"問題 {idx + 1}: 正解メッセージのサイズが無効です。例: 28px")
-            if not is_valid_color(wrong_color):
+            if not (wrong_color.startswith("#") and (len(wrong_color) == 7 or len(wrong_color) == 4)):
                 errors.append(f"問題 {idx + 1}: 不正解メッセージの色が無効です。例: #ff0000")
-            if not wrong_size.endswith("px") or not wrong_size[:-2].isdigit():
+            if not (wrong_size.endswith("px") and wrong_size[:-2].isdigit()):
                 errors.append(f"問題 {idx + 1}: 不正解メッセージのサイズが無効です。例: 28px")
           
             if errors:
@@ -419,7 +419,7 @@ elif st.session_state["edit_mode"]:
                 }
                 save_quiz_data()
                 st.success(f"✅ 問題 {idx + 1} を更新しました！")
-                st.set_query_params()  # クエリパラメータのクリア
+                st.set_query_params({})  # クエリパラメータをクリア
                 st.experimental_rerun()
     # 新しい問題の追加セクション
     st.markdown(f"<h3 style='color:{editor_style['heading_color']}; font-size:{editor_style['heading_size']};'>➕ 新しい問題を追加</h3>", unsafe_allow_html=True)
@@ -505,10 +505,10 @@ elif st.session_state["edit_mode"]:
             })
             save_quiz_data()
             st.success("✅ 新しい問題を追加しました！")
-            st.set_query_params()  # クエリパラメータのクリア
+            st.set_query_params({})  # クエリパラメータをクリア
             st.experimental_rerun()
     if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False
         st.session_state["quiz_started"] = False
-        st.set_query_params()  # クエリパラメータのクリア
+        st.set_query_params({})  # クエリパラメータをクリア
         st.experimental_rerun()
