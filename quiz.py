@@ -82,44 +82,46 @@ st.markdown("""
             background-color: #3333CC;
         }
     </style>
-    <div class="fixed-buttons">
-        <form action="" method="get">
-            <button name="edit_mode_toggle" type="submit">🔧 編集モード</button>
-        </form>
-        <form action="" method="get">
-            <button name="back_to_start" type="submit">🔙 最初の画面</button>
-        </form>
-    </div>
 """, unsafe_allow_html=True)
-# 編集モード切り替え処理
-query_params = st.query_params
-if "edit_mode_toggle" in query_params:
+# ボタンのコールバック関数
+def toggle_edit_mode():
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.set_query_params()  # クエリパラメータをクリア
     st.rerun()
+def back_to_start():
+    st.session_state["edit_mode"] = False
+    st.session_state["quiz_started"] = False
+    st.rerun()
+def start_quiz():
+    st.session_state["quiz_started"] = True
+    st.rerun()
+# 固定ボタンの表示
+st.markdown("""
+    <div class="fixed-buttons">
+        <button onClick="toggle_edit_mode()">🔧 編集モード</button>
+        <button onClick="back_to_start()">🔙 最初の画面</button>
+    </div>
+    <script>
+        function toggle_edit_mode() {
+            Streamlit.setComponentValue("toggle_edit_mode");
+        }
+        function back_to_start() {
+            Streamlit.setComponentValue("back_to_start");
+        }
+    </script>
+""", unsafe_allow_html=True)
+# Streamlitのイベントハンドラを設定
+if "toggle_edit_mode" in st.session_state:
+    toggle_edit_mode()
+    st.session_state.pop("toggle_edit_mode")
+if "back_to_start" in st.session_state:
+    back_to_start()
+    st.session_state.pop("back_to_start")
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
     st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-    st.markdown("""
-        <form action="" method="get" style="text-align:center; margin-top: 50px;">
-            <button type="submit" name="start_quiz" style="
-                font-size: 36px;
-                padding: 20px 60px;
-                background-color: #28a745;
-                color: white;
-                border: 4px solid gold;
-                border-radius: 12px;
-                cursor: pointer;
-            ">
-                ▶️ クイズを開始
-            </button>
-        </form>
-    """, unsafe_allow_html=True)
-    if "start_quiz" in st.query_params:
-        st.session_state["quiz_started"] = True
-        st.set_query_params()  # クエリパラメータをクリア
-        st.rerun()
+    if st.button("▶️ クイズを開始"):
+        start_quiz()
 # クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
@@ -210,7 +212,4 @@ elif st.session_state["edit_mode"]:
             st.error("⚠️ 必須項目をすべて入力してください！")
     # 最初の画面に戻るボタン
     if st.button("🔙 最初の画面に戻る"):
-        st.session_state["edit_mode"] = False  # 編集モードを解除
-        st.session_state["quiz_started"] = False  # クイズ開始状態を停止
-        st.set_query_params()  # クエリパラメータをクリア
-        st.rerun()
+        back_to_start()
