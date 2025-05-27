@@ -1,18 +1,15 @@
 import streamlit as st
 import json
 from pathlib import Path
-
 # データ保存関数
 def save_quiz_data():
     with open("quiz_data.json", "w", encoding="utf-8") as f:
         json.dump(st.session_state["quiz_data"], f, ensure_ascii=False)
-
 # データロード関数
 def load_quiz_data():
     if Path("quiz_data.json").exists():
         with open("quiz_data.json", "r", encoding="utf-8") as f:
             st.session_state["quiz_data"] = json.load(f)
-
 # セッション初期化
 if "quiz_data" not in st.session_state:
     load_quiz_data()
@@ -32,7 +29,6 @@ if "quiz_data" not in st.session_state:
             q["explanation"] = "解説がまだ追加されていません"
         if "points" not in q:
             q["points"] = 1  # デフォルト点数を設定
-
 # セッション状態の初期化
 for key, default in {
     "quiz_started": False,
@@ -43,7 +39,6 @@ for key, default in {
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
-
 # カスタムCSSの適用
 st.markdown("""
     <style>
@@ -86,6 +81,27 @@ st.markdown("""
         .fixed-buttons button:hover {
             background-color: #3333CC;
         }
+        /* 新しいカスタムスタイル */
+        .problem-text {
+            color: #FFD700; /* 例えばゴールド */
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .custom-text {
+            color: #ADD8E6; /* 例えばライトブルー */
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        .correct {
+            color: #32CD32; /* ライムグリーン */
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .wrong {
+            color: #FF4500; /* オレンジレッド */
+            font-size: 32px;
+            font-weight: bold;
+        }
     </style>
     <div class="fixed-buttons">
         <form action="" method="get">
@@ -96,13 +112,11 @@ st.markdown("""
         </form>
     </div>
 """, unsafe_allow_html=True)
-
 # 編集モード切り替え処理
 if "edit_mode_toggle" in st.query_params:
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     st.query_params.clear()
-    st.rerun()
-
+    st.experimental_rerun()
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
@@ -122,32 +136,28 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
             </button>
         </form>
     """, unsafe_allow_html=True)
-
     if "start_quiz" in st.query_params:
         st.session_state["quiz_started"] = True
         st.query_params.clear()
-        st.rerun()
+        st.experimental_rerun()
 # クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
-
         # 画像表示（エラー対策付き）
         if question.get("image_url"):
             try:
                 st.image(question["image_url"], width=600)
             except Exception:
                 st.warning("画像の読み込みに失敗しました。")
-
-        st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
-
+        # 問題文の表示をカスタムクラスに変更
+        st.markdown(f"<p class='problem-text'>問題: {question['question']}</p>", unsafe_allow_html=True)
         if not st.session_state["answered"]:
             for option in question["options"]:
                 if st.button(option, key=f"option_{option}"):
                     st.session_state["selected_option"] = option
                     st.session_state["answered"] = True
-
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
@@ -158,16 +168,13 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
-        
             st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
-        
             if st.button("次の問題へ"):
                 st.session_state["current_question"] += 1
                 st.session_state["answered"] = False
                 st.session_state["score_updated"] = False  # フラグをリセット
                 st.session_state.pop("selected_option", None)
-                st.rerun()
-
+                st.experimental_rerun()
     else:
         total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
@@ -175,11 +182,9 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
         # スコアの表示を100点満点に変更
         st.write(f"あなたのスコア: {st.session_state['score']} / 100")
         save_quiz_data()
-
 # 編集モードページ
 elif st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
-
     # 各問題の編集セクション
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"<h3>問題 {idx + 1}</h3>", unsafe_allow_html=True)
@@ -189,7 +194,6 @@ elif st.session_state["edit_mode"]:
         image_url = st.text_input("画像URLを編集:", q["image_url"], key=f"image_url_{idx}")
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
         points = st.number_input("点数を設定:", min_value=1, max_value=100, value=q["points"], key=f"points_{idx}")  # 点数入力欄を追加
-
         if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
             st.session_state["quiz_data"][idx] = {
                 "question": question_text,
@@ -201,7 +205,6 @@ elif st.session_state["edit_mode"]:
             }
             save_quiz_data()
             st.success(f"✅ 問題 {idx + 1} を更新しました！")
-
     # 新しい問題の追加セクション
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", key="new_question")
@@ -210,7 +213,6 @@ elif st.session_state["edit_mode"]:
     new_image_url = st.text_input("画像URL:", key="new_image_url")
     new_explanation = st.text_area("解説:", key="new_explanation")
     new_points = st.number_input("点数を設定:", min_value=1, max_value=100, value=1, key="new_points")  # 新しい問題の点数
-
     if st.button("➕ 問題を追加"):
         if new_question and all(new_options) and new_answer and new_explanation:
             st.session_state["quiz_data"].append({
@@ -225,7 +227,6 @@ elif st.session_state["edit_mode"]:
             st.success("✅ 新しい問題を追加しました！")
         else:
             st.error("⚠️ 必須項目をすべて入力してください！")
-
     # 最初の画面に戻るボタン
     if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False  # 編集モードを解除
