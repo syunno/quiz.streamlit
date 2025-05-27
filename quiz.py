@@ -49,7 +49,10 @@ def reset_quiz():
 def start_quiz():
     reset_quiz()
     st.session_state["quiz_started"] = True
-# カスタムCSSの適用（色の変更は行いません）
+# クイズ終了時のリセット関数
+def end_quiz():
+    reset_quiz()
+# カスタムCSSの適用
 st.markdown("""
     <style>
         .stApp {
@@ -58,22 +61,23 @@ st.markdown("""
             background-position: center;
             background-attachment: fixed;
         }
-        .custom-title {
-            font-size: 64px;
-            font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
+        /* タイトルとサブタイトルのスタイル */
+        h1 {
+            color: #FFD700; /* ゴールド */
+            font-size: 48px;
             text-align: center;
-            color: black;
+            margin-top: 20px;
         }
-        .custom-subtitle {
-            font-size: 40px;
-            color: black;
-            margin-bottom: 20px;
+        h2 {
+            color: #ADD8E6; /* ライトブルー */
+            font-size: 36px;
             text-align: center;
+            margin-bottom: 20px;
         }
         /* サイドバー用ボタンのスタイル */
         .sidebar-button {
             background-color: #4444FF;
-            color: black;
+            color: white;
             font-size: 18px;
             padding: 10px 20px;
             border-radius: 8px;
@@ -86,21 +90,27 @@ st.markdown("""
         .sidebar-button:hover {
             background-color: #3333CC;
         }
+        /* クイズ終了メッセージのスタイル */
+        .quiz-end {
+            color: green;
+            font-size: 36px;
+            text-align: center;
+        }
     </style>
 """, unsafe_allow_html=True)
 # サイドバーに固定ボタンを配置
 st.sidebar.title("メニュー")
-if st.sidebar.button("🔧 編集モード"):
+if st.sidebar.button("🔧 編集モード", key="edit_mode_button"):
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     reset_quiz()
-if st.sidebar.button("🔙 最初の画面"):
+if st.sidebar.button("🔙 最初の画面", key="back_to_start_button"):
     reset_quiz()
 # 条件分岐による表示
 if st.session_state["edit_mode"]:
-    st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
+    st.markdown("<h1>クイズ編集モード</h1>", unsafe_allow_html=True)
     # 各問題の編集セクション
     for idx, q in enumerate(st.session_state["quiz_data"]):
-        st.markdown(f"<h3>問題 {idx + 1}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h2>問題 {idx + 1}</h2>", unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
       
@@ -114,6 +124,7 @@ if st.session_state["edit_mode"]:
         image_url = st.text_input("画像URLを編集:", q["image_url"], key=f"image_url_{idx}")
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
         points = st.number_input("点数を設定:", min_value=1, max_value=100, value=q["points"], key=f"points_{idx}")  # 点数入力欄を追加
+      
         if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
             st.session_state["quiz_data"][idx] = {
                 "question": question_text,
@@ -125,6 +136,7 @@ if st.session_state["edit_mode"]:
             }
             save_quiz_data()
             st.success(f"✅ 問題 {idx + 1} を更新しました！")
+  
     # 新しい問題の追加セクション
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", key="new_question")
@@ -133,7 +145,8 @@ if st.session_state["edit_mode"]:
     new_image_url = st.text_input("画像URL:", key="new_image_url")
     new_explanation = st.text_area("解説:", key="new_explanation")
     new_points = st.number_input("点数を設定:", min_value=1, max_value=100, value=1, key="new_points")  # 新しい問題の点数
-    if st.button("➕ 問題を追加"):
+  
+    if st.button("➕ 問題を追加", key="add_question_button"):
         if new_question and all(new_options) and new_answer and new_explanation:
             st.session_state["quiz_data"].append({
                 "question": new_question,
@@ -151,19 +164,23 @@ elif st.session_state["quiz_started"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
+      
         # 画像表示（エラー対策付き）
         if question.get("image_url"):
             try:
                 st.image(question["image_url"], width=600)
             except Exception:
                 st.warning("画像の読み込みに失敗しました。")
-        # 問題文の表示（色は変更しません）
-        st.markdown(f"<p style='color:black; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
+      
+        # 問題文の表示
+        st.markdown(f"<h2>問題: {question['question']}</h2>", unsafe_allow_html=True)
+      
         if not st.session_state["answered"]:
             for option in question["options"]:
                 if st.button(option, key=f"option_{option}"):
                     st.session_state["selected_option"] = option
                     st.session_state["answered"] = True
+      
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             if selected_option == question["answer"]:
@@ -176,20 +193,24 @@ elif st.session_state["quiz_started"]:
                 st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
           
             st.markdown(f"<p style='color:black; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
-            if st.button("次の問題へ"):
+      
+            if st.button("次の問題へ", key="next_question_button"):
                 st.session_state["current_question"] += 1
                 st.session_state["answered"] = False
                 st.session_state["score_updated"] = False  # フラグをリセット
                 st.session_state.pop("selected_option", None)
     else:
-        st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 合計点数の計算を追加
+        st.markdown("<h1 class='quiz-end'>クイズ終了！🎉</h1>", unsafe_allow_html=True)
         # スコアの表示を100点満点に変更
         st.write(f"あなたのスコア: {st.session_state['score']} / 100")
         save_quiz_data()
-# 編集モード以外かつクイズ未開始の場合、最初の画面を表示
+      
+        # クイズ終了後に最初の画面に戻るボタンを表示
+        if st.button("🔙 最初の画面に戻る", key="reset_button"):
+            end_quiz()
 else:
-    st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
-    st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-    if st.button("▶️ クイズを開始", key="start_quiz_button"):
-        start_quiz()
+    # 最初の画面（タイトルとサブタイトル）
+    st.markdown('<h1>デジタルクイズ</h1>', unsafe_allow_html=True)
+    st.markdown('<h2>クイズを解いてデジタル機器について学ぼう！</h2>', unsafe_allow_html=True)
+    if st.button("▶️ クイズを開始", key="start_quiz_button", on_click=start_quiz):
+        pass  # on_click が start_quiz を呼び出すため、ここは空にします
