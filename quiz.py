@@ -92,9 +92,10 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 # 編集モード切り替え処理
-if "edit_mode_toggle" in st.experimental_get_query_params():
+query_params = st.query_params
+if "edit_mode_toggle" in query_params:
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.experimental_set_query_params()  # クエリパラメータをクリア
+    st.set_query_params()  # クエリパラメータをクリア
     st.rerun()
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -115,9 +116,9 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
             </button>
         </form>
     """, unsafe_allow_html=True)
-    if "start_quiz" in st.experimental_get_query_params():
+    if "start_quiz" in st.query_params:
         st.session_state["quiz_started"] = True
-        st.experimental_set_query_params()
+        st.set_query_params()  # クエリパラメータをクリア
         st.rerun()
 # クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -149,7 +150,6 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
           
             st.markdown(f"<p style='color:white; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
-      
             if st.button("次の問題へ"):
                 st.session_state["current_question"] += 1
                 st.session_state["answered"] = False
@@ -212,4 +212,5 @@ elif st.session_state["edit_mode"]:
     if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False  # 編集モードを解除
         st.session_state["quiz_started"] = False  # クイズ開始状態を停止
+        st.set_query_params()  # クエリパラメータをクリア
         st.rerun()
