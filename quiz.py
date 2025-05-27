@@ -82,46 +82,57 @@ st.markdown("""
             background-color: #3333CC;
         }
     </style>
-""", unsafe_allow_html=True)
-# ボタンのコールバック関数
-def toggle_edit_mode():
-    st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.rerun()
-def back_to_start():
-    st.session_state["edit_mode"] = False
-    st.session_state["quiz_started"] = False
-    st.rerun()
-def start_quiz():
-    st.session_state["quiz_started"] = True
-    st.rerun()
-# 固定ボタンの表示
-st.markdown("""
     <div class="fixed-buttons">
         <button onClick="toggle_edit_mode()">🔧 編集モード</button>
         <button onClick="back_to_start()">🔙 最初の画面</button>
     </div>
     <script>
         function toggle_edit_mode() {
-            Streamlit.setComponentValue("toggle_edit_mode");
+            const url = new URL(window.location);
+            url.searchParams.set('toggle_edit_mode', '1');
+            window.location = url.toString();
         }
         function back_to_start() {
-            Streamlit.setComponentValue("back_to_start");
+            const url = new URL(window.location);
+            url.searchParams.set('back_to_start', '1');
+            window.location = url.toString();
         }
     </script>
 """, unsafe_allow_html=True)
-# Streamlitのイベントハンドラを設定
-if "toggle_edit_mode" in st.session_state:
-    toggle_edit_mode()
-    st.session_state.pop("toggle_edit_mode")
-if "back_to_start" in st.session_state:
-    back_to_start()
-    st.session_state.pop("back_to_start")
+# URL クエリパラメータの取得
+query_params = st.experimental_get_query_params()
+# 編集モード切り替え処理
+if "toggle_edit_mode" in query_params:
+    st.session_state["edit_mode"] = not st.session_state["edit_mode"]
+    # URLをクリーンアップ
+    st.experimental_set_query_params()
+    st.experimental_rerun()
+# 最初の画面に戻る処理
+if "back_to_start" in query_params:
+    st.session_state["edit_mode"] = False
+    st.session_state["quiz_started"] = False
+    st.experimental_set_query_params()
+    st.experimental_rerun()
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
     st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-    if st.button("▶️ クイズを開始"):
-        start_quiz()
+    st.markdown("""
+        <form style="text-align:center; margin-top: 50px;">
+            <button type="button" onclick="start_quiz()">▶️ クイズを開始</button>
+        </form>
+        <script>
+            function start_quiz() {
+                const url = new URL(window.location);
+                url.searchParams.set('start_quiz', '1');
+                window.location = url.toString();
+            }
+        </script>
+    """, unsafe_allow_html=True)
+    if "start_quiz" in query_params:
+        st.session_state["quiz_started"] = True
+        st.experimental_set_query_params()
+        st.experimental_rerun()
 # クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
@@ -157,7 +168,7 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.session_state["answered"] = False
                 st.session_state["score_updated"] = False  # フラグをリセット
                 st.session_state.pop("selected_option", None)
-                st.rerun()
+                st.experimental_rerun()
     else:
         total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
@@ -212,4 +223,7 @@ elif st.session_state["edit_mode"]:
             st.error("⚠️ 必須項目をすべて入力してください！")
     # 最初の画面に戻るボタン
     if st.button("🔙 最初の画面に戻る"):
-        back_to_start()
+        st.session_state["edit_mode"] = False  # 編集モードを解除
+        st.session_state["quiz_started"] = False  # クイズ開始状態を停止
+        st.experimental_set_query_params()
+        st.experimental_rerun()
