@@ -39,6 +39,16 @@ for key, default in {
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
+# クイズのリセット関数
+def reset_quiz():
+    st.session_state["quiz_started"] = False
+    st.session_state["score"] = 0
+    st.session_state["current_question"] = 0
+    st.session_state["answered"] = False
+# クイズの開始関数
+def start_quiz():
+    reset_quiz()
+    st.session_state["quiz_started"] = True
 # カスタムCSSの適用（色の変更は行いません）
 st.markdown("""
     <style>
@@ -82,60 +92,11 @@ st.markdown("""
 st.sidebar.title("メニュー")
 if st.sidebar.button("🔧 編集モード"):
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.session_state["quiz_started"] = False  # クイズ状態を停止
+    reset_quiz()
 if st.sidebar.button("🔙 最初の画面"):
-    st.session_state["edit_mode"] = False  # 編集モードを解除
-    st.session_state["quiz_started"] = False  # クイズ開始状態を停止
-# 最初の画面
-if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
-    st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
-    st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-    if st.button("▶️ クイズを開始", key="start_quiz_button"):
-        st.session_state["quiz_started"] = True
-# クイズのページ
-if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
-    question_index = st.session_state["current_question"]
-    if question_index < len(st.session_state["quiz_data"]):
-        question = st.session_state["quiz_data"][question_index]
-        # 画像表示（エラー対策付き）
-        if question.get("image_url"):
-            try:
-                st.image(question["image_url"], width=600)
-            except Exception:
-                st.warning("画像の読み込みに失敗しました。")
-        # 問題文の表示（色は変更しません）
-        st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
-        if not st.session_state["answered"]:
-            for option in question["options"]:
-                if st.button(option, key=f"option_{option}"):
-                    st.session_state["selected_option"] = option
-                    st.session_state["answered"] = True
-        if st.session_state["answered"]:
-            selected_option = st.session_state["selected_option"]
-            if selected_option == question["answer"]:
-                # スコア加算は一回のみ確実に実行
-                if "score_updated" not in st.session_state or not st.session_state["score_updated"]:
-                    st.session_state["score"] += question["points"]  # 正解時にのみ加算
-                    st.session_state["score_updated"] = True  # 加算済みフラグを設定
-                st.markdown("<h2 style='color:green;'>🎉 正解！</h2>", unsafe_allow_html=True)
-            else:
-                st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
-          
-            st.markdown(f"<p style='color:white; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
-            if st.button("次の問題へ"):
-                st.session_state["current_question"] += 1
-                st.session_state["answered"] = False
-                st.session_state["score_updated"] = False  # フラグをリセット
-                st.session_state.pop("selected_option", None)
-    else:
-        total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
-        st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 合計点数の計算を追加
-        # スコアの表示を100点満点に変更
-        st.write(f"あなたのスコア: {st.session_state['score']} / 100")
-        save_quiz_data()
+    reset_quiz()
 # 編集モードページ
-elif st.session_state["edit_mode"]:
+if st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
     # 各問題の編集セクション
     for idx, q in enumerate(st.session_state["quiz_data"]):
@@ -184,3 +145,51 @@ elif st.session_state["edit_mode"]:
             st.success("✅ 新しい問題を追加しました！")
         else:
             st.error("⚠️ 必須項目をすべて入力してください！")
+# 最初の画面
+if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
+    st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
+    if st.button("▶️ クイズを開始", key="start_quiz_button"):
+        start_quiz()
+# クイズのページ
+if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
+    question_index = st.session_state["current_question"]
+    if question_index < len(st.session_state["quiz_data"]):
+        question = st.session_state["quiz_data"][question_index]
+        # 画像表示（エラー対策付き）
+        if question.get("image_url"):
+            try:
+                st.image(question["image_url"], width=600)
+            except Exception:
+                st.warning("画像の読み込みに失敗しました。")
+        # 問題文の表示（色は変更しません）
+        st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
+        if not st.session_state["answered"]:
+            for option in question["options"]:
+                if st.button(option, key=f"option_{option}"):
+                    st.session_state["selected_option"] = option
+                    st.session_state["answered"] = True
+        if st.session_state["answered"]:
+            selected_option = st.session_state["selected_option"]
+            if selected_option == question["answer"]:
+                # スコア加算は一回のみ確実に実行
+                if "score_updated" not in st.session_state or not st.session_state["score_updated"]:
+                    st.session_state["score"] += question["points"]  # 正解時にのみ加算
+                    st.session_state["score_updated"] = True  # 加算済みフラグを設定
+                st.markdown("<h2 style='color:green;'>🎉 正解！</h2>", unsafe_allow_html=True)
+            else:
+                st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
+          
+            st.markdown(f"<p style='color:white; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+            if st.button("次の問題へ"):
+                st.session_state["current_question"] += 1
+                st.session_state["answered"] = False
+                st.session_state["score_updated"] = False  # フラグをリセット
+                st.session_state.pop("selected_option", None)
+    else:
+        total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
+        st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
+        total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 合計点数の計算を追加
+        # スコアの表示を100点満点に変更
+        st.write(f"あなたのスコア: {st.session_state['score']} / 100")
+        save_quiz_data()
