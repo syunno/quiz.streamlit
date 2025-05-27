@@ -39,7 +39,7 @@ for key, default in {
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
-# カスタムCSSの適用
+# カスタムCSSの適用（色の変更は行いません）
 st.markdown("""
     <style>
         .stApp {
@@ -81,27 +81,6 @@ st.markdown("""
         .fixed-buttons button:hover {
             background-color: #3333CC;
         }
-        /* 新しいカスタムスタイル */
-        .problem-text {
-            color: #FFD700; /* 例えばゴールド */
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .custom-text {
-            color: #ADD8E6; /* 例えばライトブルー */
-            font-size: 20px;
-            margin-top: 10px;
-        }
-        .correct {
-            color: #32CD32; /* ライムグリーン */
-            font-size: 32px;
-            font-weight: bold;
-        }
-        .wrong {
-            color: #FF4500; /* オレンジレッド */
-            font-size: 32px;
-            font-weight: bold;
-        }
     </style>
     <div class="fixed-buttons">
         <form action="" method="get">
@@ -115,7 +94,7 @@ st.markdown("""
 # 編集モード切り替え処理
 if "edit_mode_toggle" in st.query_params:
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.query_params.clear()
+    st.experimental_set_query_params()
     st.experimental_rerun()
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -138,7 +117,7 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     """, unsafe_allow_html=True)
     if "start_quiz" in st.query_params:
         st.session_state["quiz_started"] = True
-        st.query_params.clear()
+        st.experimental_set_query_params()
         st.experimental_rerun()
 # クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
@@ -151,8 +130,8 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.image(question["image_url"], width=600)
             except Exception:
                 st.warning("画像の読み込みに失敗しました。")
-        # 問題文の表示をカスタムクラスに変更
-        st.markdown(f"<p class='problem-text'>問題: {question['question']}</p>", unsafe_allow_html=True)
+        # 問題文の表示（色は変更しません）
+        st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
         if not st.session_state["answered"]:
             for option in question["options"]:
                 if st.button(option, key=f"option_{option}"):
@@ -165,10 +144,12 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 if "score_updated" not in st.session_state or not st.session_state["score_updated"]:
                     st.session_state["score"] += question["points"]  # 正解時にのみ加算
                     st.session_state["score_updated"] = True  # 加算済みフラグを設定
-                st.markdown("<h2 class='correct'>🎉 正解！</h2>", unsafe_allow_html=True)
+                st.markdown("<h2 style='color:green;'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
-                st.markdown("<h2 class='wrong'>❌ 不正解！</h2>", unsafe_allow_html=True)
-            st.markdown(f"<p class='custom-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+                st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
+          
+            st.markdown(f"<p style='color:white; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+      
             if st.button("次の問題へ"):
                 st.session_state["current_question"] += 1
                 st.session_state["answered"] = False
