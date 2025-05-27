@@ -79,7 +79,7 @@ st.markdown("""
         /* タイトルとサブタイトルのスタイル */
         h1 {
             color: #FFD700; /* ゴールド */
-            font-size: 45px;
+            font-size: 40px;
             text-align: center;
             margin-top: 20px;
         }
