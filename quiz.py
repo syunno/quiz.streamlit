@@ -95,7 +95,7 @@ if st.sidebar.button("🔧 編集モード"):
     reset_quiz()
 if st.sidebar.button("🔙 最初の画面"):
     reset_quiz()
-# 編集モードページ
+# 条件分岐による表示
 if st.session_state["edit_mode"]:
     st.markdown("<h2>クイズ編集モード</h2>", unsafe_allow_html=True)
     # 各問題の編集セクション
@@ -103,12 +103,14 @@ if st.session_state["edit_mode"]:
         st.markdown(f"<h3>問題 {idx + 1}</h3>", unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
+      
         # 正解が選択肢に含まれていない場合、一番最初をデフォルトに設定
         if q["answer"] in options:
             default_index = options.index(q["answer"])
         else:
             default_index = 0
         answer = st.selectbox("正解を選択:", options, index=default_index, key=f"answer_{idx}")
+      
         image_url = st.text_input("画像URLを編集:", q["image_url"], key=f"image_url_{idx}")
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
         points = st.number_input("点数を設定:", min_value=1, max_value=100, value=q["points"], key=f"points_{idx}")  # 点数入力欄を追加
@@ -145,14 +147,7 @@ if st.session_state["edit_mode"]:
             st.success("✅ 新しい問題を追加しました！")
         else:
             st.error("⚠️ 必須項目をすべて入力してください！")
-# 最初の画面
-if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
-    st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
-    st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-    if st.button("▶️ クイズを開始", key="start_quiz_button"):
-        start_quiz()
-# クイズのページ
-if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
+elif st.session_state["quiz_started"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
@@ -187,9 +182,14 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.session_state["score_updated"] = False  # フラグをリセット
                 st.session_state.pop("selected_option", None)
     else:
-        total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
         total_points = sum(q["points"] for q in st.session_state["quiz_data"])  # 合計点数の計算を追加
         # スコアの表示を100点満点に変更
         st.write(f"あなたのスコア: {st.session_state['score']} / 100")
         save_quiz_data()
+# 編集モード以外かつクイズ未開始の場合、最初の画面を表示
+else:
+    st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
+    if st.button("▶️ クイズを開始", key="start_quiz_button"):
+        start_quiz()
