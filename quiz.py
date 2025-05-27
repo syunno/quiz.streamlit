@@ -79,13 +79,13 @@ st.markdown("""
         /* タイトルとサブタイトルのスタイル */
         h1 {
             color: #FFD700; /* ゴールド */
-            font-size: 40px;
+            font-size: 48px;
             text-align: center;
             margin-top: 20px;
         }
         h2 {
             color: #ADD8E6; /* ライトブルー */
-            font-size: 36px;
+            font-size: 33px;
             text-align: center;
             margin-bottom: 20px;
         }
