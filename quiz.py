@@ -158,7 +158,7 @@ elif st.session_state["quiz_started"]:
             except Exception:
                 st.warning("画像の読み込みに失敗しました。")
         # 問題文の表示（色は変更しません）
-        st.markdown(f"<p style='color:white; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color:black; font-size:24px;'><strong>問題: {question['question']}</strong></p>", unsafe_allow_html=True)
         if not st.session_state["answered"]:
             for option in question["options"]:
                 if st.button(option, key=f"option_{option}"):
@@ -175,7 +175,7 @@ elif st.session_state["quiz_started"]:
             else:
                 st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
           
-            st.markdown(f"<p style='color:white; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p style='color:black; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
             if st.button("次の問題へ"):
                 st.session_state["current_question"] += 1
                 st.session_state["answered"] = False
