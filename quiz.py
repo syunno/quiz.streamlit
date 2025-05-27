@@ -60,16 +60,8 @@ st.markdown("""
             margin-bottom: 20px;
             text-align: center;
         }
-        .fixed-buttons {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .fixed-buttons button {
+        /* サイドバー用ボタンのスタイル */
+        .sidebar-button {
             background-color: #4444FF;
             color: white;
             font-size: 18px;
@@ -77,53 +69,29 @@ st.markdown("""
             border-radius: 8px;
             border: 2px solid gold;
             cursor: pointer;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
         }
-        .fixed-buttons button:hover {
+        .sidebar-button:hover {
             background-color: #3333CC;
         }
-        /* 追加スタイル（必要なら） */
     </style>
 """, unsafe_allow_html=True)
-# ボタンのクリック処理
-def toggle_edit_mode():
+# サイドバーに固定ボタンを配置
+st.sidebar.title("メニュー")
+if st.sidebar.button("🔧 編集モード"):
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     st.session_state["quiz_started"] = False  # クイズ状態を停止
-    st.experimental_rerun()
-def back_to_start():
-    st.session_state["edit_mode"] = False
-    st.session_state["quiz_started"] = False
-    st.experimental_rerun()
-# 固定ボタンの表示
-st.markdown("""
-    <div class="fixed-buttons">
-        <button onclick="window.location.href='#'">🔧 編集モード</button>
-        <button onclick="window.location.href='#'">🔙 最初の画面</button>
-    </div>
-    <script>
-        const editButton = document.querySelector('.fixed-buttons button:nth-child(1)');
-        const backButton = document.querySelector('.fixed-buttons button:nth-child(2)');
-        editButton.addEventListener('click', () => {
-            Streamlit.setComponentValue('toggle_edit_mode');
-        });
-        backButton.addEventListener('click', () => {
-            Streamlit.setComponentValue('back_to_start');
-        });
-    </script>
-""", unsafe_allow_html=True)
-# Streamlitのセッション状態とボタンの連携
-if 'toggle_edit_mode' in st.session_state:
-    toggle_edit_mode()
-    del st.session_state['toggle_edit_mode']
-if 'back_to_start' in st.session_state:
-    back_to_start()
-    del st.session_state['back_to_start']
+if st.sidebar.button("🔙 最初の画面"):
+    st.session_state["edit_mode"] = False  # 編集モードを解除
+    st.session_state["quiz_started"] = False  # クイズ開始状態を停止
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
     st.markdown('<div class="custom-subtitle">クイズを解いてデジタル機器について学ぼう！</div>', unsafe_allow_html=True)
-    if st.button("▶️ クイズを開始"):
+    if st.button("▶️ クイズを開始", key="start_quiz_button"):
         st.session_state["quiz_started"] = True
-        st.experimental_rerun()
 # クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
@@ -159,7 +127,6 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.session_state["answered"] = False
                 st.session_state["score_updated"] = False  # フラグをリセット
                 st.session_state.pop("selected_option", None)
-                st.experimental_rerun()
     else:
         total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
@@ -175,10 +142,11 @@ elif st.session_state["edit_mode"]:
         st.markdown(f"<h3>問題 {idx + 1}</h3>", unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
+        # 正解が選択肢に含まれていない場合、一番最初をデフォルトに設定
         if q["answer"] in options:
             default_index = options.index(q["answer"])
         else:
-            default_index = 0  # 一致しない場合は最初を選択
+            default_index = 0
         answer = st.selectbox("正解を選択:", options, index=default_index, key=f"answer_{idx}")
         image_url = st.text_input("画像URLを編集:", q["image_url"], key=f"image_url_{idx}")
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
@@ -216,6 +184,3 @@ elif st.session_state["edit_mode"]:
             st.success("✅ 新しい問題を追加しました！")
         else:
             st.error("⚠️ 必須項目をすべて入力してください！")
-    # 最初の画面に戻るボタン
-    if st.button("🔙 最初の画面に戻る"):
-        back_to_start()
