@@ -53,7 +53,7 @@ def start_quiz():
 st.markdown("""
     <style>
         .stApp {
-            background-image: url("https://tse2.mm.bing.net/th/id/OIP.sVqIT6owUt2ssL-TQ_iOvQHaEo?cb=iwp2&rs=1&pid=ImgDetMain");
+            background-image: url("https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -62,18 +62,18 @@ st.markdown("""
             font-size: 64px;
             font-family: "Yu Mincho", "Hiragino Mincho Pro", serif;
             text-align: center;
-            color: white;
+            color: black;
         }
         .custom-subtitle {
             font-size: 40px;
-            color: white;
+            color: black;
             margin-bottom: 20px;
             text-align: center;
         }
         /* サイドバー用ボタンのスタイル */
         .sidebar-button {
             background-color: #4444FF;
-            color: white;
+            color: black;
             font-size: 18px;
             padding: 10px 20px;
             border-radius: 8px;
