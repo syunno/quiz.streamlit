@@ -92,10 +92,10 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 # 編集モード切り替え処理
-if "edit_mode_toggle" in st.query_params:
+if "edit_mode_toggle" in st.experimental_get_query_params():
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
-    st.experimental_set_query_params()
-    st.experimental_rerun()
+    st.experimental_set_query_params()  # クエリパラメータをクリア
+    st.rerun()
 # 最初の画面
 if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     st.markdown('<div class="custom-title">デジタルクイズ</div>', unsafe_allow_html=True)
@@ -115,10 +115,10 @@ if not st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
             </button>
         </form>
     """, unsafe_allow_html=True)
-    if "start_quiz" in st.query_params:
+    if "start_quiz" in st.experimental_get_query_params():
         st.session_state["quiz_started"] = True
         st.experimental_set_query_params()
-        st.experimental_rerun()
+        st.rerun()
 # クイズのページ
 if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
     question_index = st.session_state["current_question"]
@@ -155,7 +155,7 @@ if st.session_state["quiz_started"] and not st.session_state["edit_mode"]:
                 st.session_state["answered"] = False
                 st.session_state["score_updated"] = False  # フラグをリセット
                 st.session_state.pop("selected_option", None)
-                st.experimental_rerun()
+                st.rerun()
     else:
         total_questions = len(st.session_state["quiz_data"])  # 全問題数を取得
         st.markdown("<h1>クイズ終了！🎉</h1>", unsafe_allow_html=True)
@@ -212,3 +212,4 @@ elif st.session_state["edit_mode"]:
     if st.button("🔙 最初の画面に戻る"):
         st.session_state["edit_mode"] = False  # 編集モードを解除
         st.session_state["quiz_started"] = False  # クイズ開始状態を停止
+        st.rerun()
