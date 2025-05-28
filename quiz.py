@@ -85,7 +85,7 @@ st.markdown("""
         }
         h2 {
             color: #ADD8E6; /* ライトブルー */
-            font-size: 24px;
+            font-size: 36px;
             text-align: center;
             margin-bottom: 20px;
         }
