@@ -1,1 +1,5 @@
-[{"question": "この城の名前は？", "options": ["姫路城", "松本城", "大阪城", "熊本城"], "answer": "姫路城", "image_url": "C:\\Users\\81802\\OneDrive\\デスクトップ\\絵\\oriba.jpg", "explanation": "あああああああああああああ"}, {"question": "この花の名前は？", "options": ["梅", "桜", "牡丹", "藤"], "answer": "桜", "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Japanese_Sakura.JPG/800px-Japanese_Sakura.JPG", "explanation": "ｃｃｃｃｃｃｃｃ"}, {"question": "aaaa", "options": ["aaa", "aa", "a", "c"], "answer": "c", "image_url": "C:\\Users\\81802\\OneDrive\\デスクトップ\\絵\\oriba.jpg", "explanation": "ｗｗｗｗｗ"}]
+[{"question": "３D計測機器を管理している係は？", "options": ["課付", "標準推進係", "工程整備係", "SE係"], "answer": "標準推進係", "image_url": "mon1.png", "explanation": "正解は標準推進係"}, 
+  {"question": "３D計測機器を予約するアプリは？", "options": ["Outlook", "Teams", "Excel", "Forms"], "answer": "Outlook", "image_url": "mon2.png", "explanation": "正解はOutlook"}, 
+  {"question": "３D計測機器を使用した後に必ずすることは？", "options": ["洗浄作業", "点検Forms", "キャリブレーション", "校正作業"], "answer": "点検Forms", "image_url": "mon3.png", "explanation": "正解は点検Forms"},
+  {"question": "３D計測機器を使用した後に必ずすることは？", "options": ["洗浄作業", "点検Forms", "キャリブレーション", "校正作業"], "answer": "点検Forms", "image_url": "mon3.png", "explanation": "正解は点検Forms"},
+]
