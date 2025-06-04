@@ -3,5 +3,5 @@
   {"question": "３D計測機器を使用した後に必ずすることは？", "options": ["洗浄作業", "点検Forms", "キャリブレーション", "校正作業"], "answer": "点検Forms", "image_url": "mon3.png", "explanation": "正解は点検Forms"},
   {"question": "WM6000で①～④どこまでのサイズが測れる？", "options": ["①", "②", "③", "④"], "answer": "③", "image_url": "mon4.png", "explanation": "正解は③"},
   {"question": "非接触で測りにくいものは？", "options": ["光沢のあるもの", "複雑な形状", "柔らかいもの", "全て測定可能"], "answer": "光沢のあるもの", "image_url": "mon5.png", "explanation": "正解は光沢のあるもの"},
-  {"question": "非接触で測りにくいものは？", "options": ["光沢のあるもの", "複雑な形状", "柔らかいもの", "全て測定可能"], "answer": "光沢のあるもの", "image_url": "mon5.png", "explanation": "正解は光沢のあるもの"}
+  {"question": "元町工場電池ラインに侵入した動物は？", "options": ["ツキノワグマ", "アライグマ", "ニホンカモシカ", "ニホンザル"], "answer": "ニホンカモシカ", "image_url": "mon6.png", "explanation": "正解はニホンカモシカ"}
 ]
