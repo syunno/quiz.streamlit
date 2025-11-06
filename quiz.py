@@ -204,6 +204,6 @@ elif st.session_state["quiz_started"]:
         st.button("🔙 最初の画面に戻る", key="reset_button", on_click=end_quiz_callback)
 else:
     # 最初の画面（タイトルとサブタイトル）
-    st.markdown('<h1>デジタルクイズ</h1>', unsafe_allow_html=True)
-    st.markdown('<h2>クイズを解いてデジタル機器について学ぼう！</h2>', unsafe_allow_html=True)
+    st.markdown('<h1>安全専念クイズ</h1>', unsafe_allow_html=True)
+    st.markdown('<h2>クイズを解いて安全知識を身に付けよう！</h2>', unsafe_allow_html=True)
     st.button("▶️ クイズを開始", key="start_quiz_button", on_click=start_quiz_callback)
