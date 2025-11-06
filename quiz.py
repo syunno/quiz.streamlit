@@ -1,6 +1,8 @@
 import streamlit as st
 import json
 from pathlib import Path
+# ページ設定（横幅を広くして改行されにくくする）
+st.set_page_config(page_title="安全専念クイズ", layout="wide")
 # データ保存関数
 def save_quiz_data():
     with open("quiz_data.json", "w", encoding="utf-8") as f:
@@ -95,7 +97,7 @@ with st.sidebar.expander("📁 データの入出力"):
             st.success("✅ インポートしました。")
         except Exception as e:
             st.error(f"⚠️ インポートに失敗しました: {e}")
-# カスタムCSSの適用
+# カスタムCSSの適用（サブタイトルは改行禁止）
 st.markdown("""
     <style>
         .stApp {
@@ -104,6 +106,8 @@ st.markdown("""
             background-position: center;
             background-attachment: fixed;
         }
+        /* コンテナ幅を広げて改行を防ぎやすく */
+        .block-container { max-width: 1200px; }
         /* タイトルとサブタイトルのスタイル */
         h1 {
             color: #FFD700; /* ゴールド */
@@ -116,6 +120,13 @@ st.markdown("""
             font-size: 36px;
             text-align: center;
             margin-bottom: 20px;
+        }
+        /* サブタイトルだけ改行禁止＋レスポンシブ調整 */
+        h2.subtitle {
+            white-space: nowrap;          /* 改行を禁止 */
+            word-break: keep-all;         /* 日本語の任意改行を避ける */
+            overflow-wrap: normal;        /* 自動折返しをしない */
+            font-size: clamp(18px, 2.8vw, 36px); /* 画面幅に応じて縮小 */
         }
         /* クイズ終了メッセージのスタイル */
         .quiz-end {
@@ -228,7 +239,7 @@ elif st.session_state["quiz_started"]:
         # クイズ終了後に最初の画面に戻るボタンを表示
         st.button("🔙 最初の画面に戻る", key="reset_button", on_click=end_quiz_callback)
 else:
-    # 最初の画面（タイトルとサブタイトル）
+    # 最初の画面（タイトルとサブタイトル） - サブタイトルは改行禁止
     st.markdown('<h1>安全専念クイズ</h1>', unsafe_allow_html=True)
-    st.markdown('<h2>クイズを解いて安全知識を身に付けよう！</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="subtitle">クイズを解いて安全知識を身に付けよう！</h2>', unsafe_allow_html=True)
     st.button("▶️ クイズを開始", key="start_quiz_button", on_click=start_quiz_callback)
