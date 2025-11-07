@@ -12,6 +12,27 @@ def load_quiz_data():
     if Path("quiz_data.json").exists():
         with open("quiz_data.json", "r", encoding="utf-8") as f:
             st.session_state["quiz_data"] = json.load(f)
+# インポート用の簡易バリデーション
+def validate_quiz_data(data):
+    if not isinstance(data, list):
+        raise ValueError("トップレベルはリストである必要があります。")
+    cleaned = []
+    for i, q in enumerate(data, 1):
+        if not isinstance(q, dict):
+            raise ValueError(f"問題 {i} が辞書ではありません。")
+        question = q.get("question")
+        options = q.get("options")
+        answer = q.get("answer")
+        if not question:
+            raise ValueError(f"問題 {i}: 'question' がありません。")
+        if not isinstance(options, list) or len(options) < 2:
+            raise ValueError(f"問題 {i}: 'options' は2つ以上のリストが必要です。")
+        if answer not in options:
+            raise ValueError(f"問題 {i}: 'answer' は 'options' に含まれている必要があります。")
+        q.setdefault("explanation", "解説がまだ追加されていません")
+        q.setdefault("points", 1)
+        cleaned.append(q)
+    return cleaned
 # セッション初期化（問題データ）
 if "quiz_data" not in st.session_state:
     load_quiz_data()
@@ -72,7 +93,7 @@ def toggle_edit_mode_callback():
 st.sidebar.title("メニュー")
 st.sidebar.button("🔧 編集モード", key="edit_mode_button", on_click=toggle_edit_mode_callback)
 st.sidebar.button("🔙 最初の画面", key="back_to_start_button", on_click=end_quiz_callback)
-# 追加: データの入出力（バックアップ/インポート）
+# データの入出力（バックアップ/インポート）
 with st.sidebar.expander("📁 データの入出力"):
     json_str = json.dumps(st.session_state["quiz_data"], ensure_ascii=False, indent=2)
     st.download_button(
@@ -84,20 +105,13 @@ with st.sidebar.expander("📁 データの入出力"):
     uploaded = st.file_uploader("JSON をインポート", type="json")
     if uploaded is not None:
         try:
-            data = json.load(uploaded)
-            assert isinstance(data, list)
-            st.session_state["quiz_data"] = data
-            # フィールド欠損に備えて補完
-            for q in st.session_state["quiz_data"]:
-                if "explanation" not in q:
-                    q["explanation"] = "解説がまだ追加されていません"
-                if "points" not in q:
-                    q["points"] = 1
+            data_raw = json.load(uploaded)
+            st.session_state["quiz_data"] = validate_quiz_data(data_raw)
             save_quiz_data()
             st.success("✅ インポートしました。")
         except Exception as e:
             st.error(f"⚠️ インポートに失敗しました: {e}")
-# カスタムCSSの適用（サブタイトルは改行禁止）
+# カスタムCSSの適用（サブタイトルは改行禁止・画像と選択肢ボタンの見やすさ向上）
 st.markdown("""
     <style>
         .stApp {
@@ -105,19 +119,29 @@ st.markdown("""
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            position: relative;
+        }
+        /* 半透明オーバーレイで可読性向上 */
+        .stApp::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+            z-index: -1;
         }
         /* コンテナ幅を広げて改行を防ぎやすく */
         .block-container { max-width: 1200px; }
         /* タイトルとサブタイトルのスタイル */
         h1 {
             color: #FFD700; /* ゴールド */
-            font-size: 48px;
+            font-size: clamp(28px, 4vw, 48px);
             text-align: center;
             margin-top: 20px;
         }
         h2 {
             color: #ADD8E6; /* ライトブルー */
-            font-size: 36px;
+            font-size: clamp(18px, 3.2vw, 36px);
             text-align: center;
             margin-bottom: 20px;
         }
@@ -130,25 +154,102 @@ st.markdown("""
         }
         /* クイズ終了メッセージのスタイル */
         .quiz-end {
-            color: green;
+            color: #90EE90;
             font-size: 36px;
             text-align: center;
+        }
+        /* 画像を画面内に収める・見やすく */
+        .stImage img {
+            max-width: 100%;
+            height: auto;
+            max-height: 60vh;             /* 画面高の6割を上限に */
+            object-fit: contain;          /* 全体が入るように */
+            display: block;
+            margin: 0 auto;
+            border-radius: 6px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.25);
+        }
+        @media (max-width: 768px) {
+            .stImage img { max-height: 40vh; }
+        }
+        /* 全体のボタンを大きく・見やすく（選択肢ボタン含む） */
+        .stButton > button {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: clamp(16px, 2.4vw, 22px);
+            border-radius: 10px !important;
+            border: 2px solid #1E90FF;
+            background: linear-gradient(180deg,#ffffff,#f6f9ff);
+            color: #0b1f33;
+            margin-bottom: 12px;
+            transition: transform .02s ease, box-shadow .2s ease, background .2s ease;
+            box-shadow: 0 2px 8px rgba(30,144,255,.25);
+        }
+        .stButton > button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(30,144,255,.35);
+            background: linear-gradient(180deg,#ffffff,#eef4ff);
+        }
+        .stButton > button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(30,144,255,.25);
+        }
+        /* サイドバーのボタンは少し小さめ */
+        section[data-testid="stSidebar"] .stButton > button {
+            font-size: 16px;
+            padding: 10px 12px;
+        }
+        /* 回答後の結果表示（2列グリッド） */
+        .options-result {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .opt-box {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: clamp(16px, 2.4vw, 22px);
+            border-radius: 10px;
+            border: 2px solid #1E90FF;
+            background: linear-gradient(180deg,#ffffff,#f6f9ff);
+            color: #0b1f33;
+            box-shadow: 0 2px 8px rgba(30,144,255,.25);
+            text-align: center;
+            font-weight: 600;
+        }
+        .opt-box.correct {
+            border-color: #2ecc71;
+            background: linear-gradient(180deg, #d6f5e3, #bdf3d2);
+            color: #0b2d14;
+        }
+        .opt-box.wrong {
+            border-color: #e74c3c;
+            background: linear-gradient(180deg, #ffe0e0, #ffd6d6);
+            color: #3b0b0b;
         }
     </style>
 """, unsafe_allow_html=True)
 # 条件分岐による表示
 if st.session_state["edit_mode"]:
     st.markdown("<h1>クイズ編集モード</h1>", unsafe_allow_html=True)
-    # 各問題の編集セクション
+    # 各問題の編集セクション（選択肢数の増減に対応）
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"<h2>問題 {idx + 1}</h2>", unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
-        options = [st.text_input(f"選択肢 {i+1}:", q["options"][i], key=f"option_{idx}_{i}") for i in range(len(q["options"]))]
-        # 正解が選択肢に含まれていない場合、一番最初をデフォルトに設定
-        if q["answer"] in options and len(options) > 0:
-            default_index = options.index(q["answer"])
-        else:
-            default_index = 0 if len(options) > 0 else 0
+        # 選択肢数を指定できるように
+        num_options = st.number_input(
+            "選択肢数",
+            min_value=2, max_value=8,
+            value=len(q["options"]),
+            step=1,
+            key=f"num_options_{idx}"
+        )
+        options = []
+        for i in range(int(num_options)):
+            default = q["options"][i] if i < len(q["options"]) else ""
+            options.append(st.text_input(f"選択肢 {i+1}:", default, key=f"option_{idx}_{i}"))
+        # answer が options にない場合のデフォルト
+        default_index = options.index(q["answer"]) if q["answer"] in options else 0
         answer = st.selectbox("正解を選択:", options if options else [""], index=default_index, key=f"answer_{idx}")
         image_url = st.text_input("画像URLを編集:", q.get("image_url", ""), key=f"image_url_{idx}")
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
@@ -156,52 +257,61 @@ if st.session_state["edit_mode"]:
         col_u, col_d = st.columns(2)
         with col_u:
             if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
-                st.session_state["quiz_data"][idx] = {
-                    "question": question_text,
-                    "options": options,
-                    "answer": answer,
-                    "image_url": image_url,
-                    "explanation": explanation,
-                    "points": int(points),
-                }
-                save_quiz_data()
-                st.success(f"✅ 問題 {idx + 1} を更新しました！")
+                if answer not in options:
+                    st.error("⚠️ 正解は選択肢に含まれている必要があります。")
+                elif any(opt.strip() == "" for opt in options):
+                    st.error("⚠️ 空の選択肢があります。すべて入力してください。")
+                else:
+                    st.session_state["quiz_data"][idx] = {
+                        "question": question_text,
+                        "options": options,
+                        "answer": answer,
+                        "image_url": image_url,
+                        "explanation": explanation,
+                        "points": int(points),
+                    }
+                    save_quiz_data()
+                    st.success(f"✅ 問題 {idx + 1} を更新しました！")
         with col_d:
             if st.button(f"🗑️ 問題 {idx + 1} を削除", key=f"delete_{idx}"):
                 st.session_state["quiz_data"].pop(idx)
                 save_quiz_data()
                 st.success(f"🗑️ 問題 {idx + 1} を削除しました！")
-                st.experimental_rerun()
+                st.rerun()
     # 新しい問題の追加セクション
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", key="new_question")
-    new_options = [st.text_input(f"選択肢 {i + 1}:", key=f"new_option_{i}") for i in range(4)]
-    new_answer = st.selectbox("正解:", new_options, key="new_answer")
+    new_num_options = st.number_input("選択肢数（2〜8）", min_value=2, max_value=8, value=4, step=1, key="new_num_options")
+    new_options = [st.text_input(f"選択肢 {i + 1}:", key=f"new_option_{i}") for i in range(int(new_num_options))]
+    new_answer = st.selectbox("正解:", new_options if new_options else [""], key="new_answer")
     new_image_url = st.text_input("画像URL:", key="new_image_url")
     new_explanation = st.text_area("解説:", key="new_explanation")
     new_points = st.number_input("点数を設定:", min_value=1, max_value=100, value=1, step=1, key="new_points")
     if st.button("➕ 問題を追加", key="add_question_button"):
-        if new_question and all(new_options) and new_answer and new_explanation:
-            st.session_state["quiz_data"].append({
-                "question": new_question,
-                "options": new_options,
-                "answer": new_answer,
-                "image_url": new_image_url,
-                "explanation": new_explanation,
-                "points": int(new_points),
-            })
-            save_quiz_data()
-            st.success("✅ 新しい問題を追加しました！")
+        if new_question and all(opt.strip() for opt in new_options) and new_answer and new_explanation:
+            if new_answer not in new_options:
+                st.error("⚠️ 正解は選択肢に含まれている必要があります。")
+            else:
+                st.session_state["quiz_data"].append({
+                    "question": new_question,
+                    "options": new_options,
+                    "answer": new_answer,
+                    "image_url": new_image_url,
+                    "explanation": new_explanation,
+                    "points": int(new_points),
+                })
+                save_quiz_data()
+                st.success("✅ 新しい問題を追加しました！")
         else:
             st.error("⚠️ 必須項目をすべて入力してください！")
 elif st.session_state["quiz_started"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
-        # 画像表示（エラー対策付き・レスポンシブ）
+        # 画像表示（画面に収まるCSS適用済み）
         if question.get("image_url"):
             try:
-                st.image(question["image_url"], use_column_width="always")
+                st.image(question["image_url"], use_column_width=True)  # True を使用
             except Exception:
                 st.warning("画像の読み込みに失敗しました。")
         # 進捗と点数の表示
@@ -210,31 +320,55 @@ elif st.session_state["quiz_started"]:
         st.progress((question_index) / total_questions if total_questions else 0)
         # 問題文の表示
         st.markdown(f"<h2>問題: {question['question']}</h2>", unsafe_allow_html=True)
+        # 選択肢 2列表示（未回答時はボタン／回答後は色付きボックス）
         if not st.session_state["answered"]:
-            # キー衝突回避: 問題番号+選択肢番号をキーに付与
+            cols = st.columns(2)
             for i, option in enumerate(question["options"]):
-                if st.button(option, key=f"option_{question_index}_{i}"):
-                    st.session_state["selected_option"] = option
-                    st.session_state["answered"] = True
+                col = cols[i % 2]
+                with col:
+                    if st.button(option, key=f"option_{question_index}_{i}"):
+                        st.session_state["selected_option"] = option
+                        st.session_state["answered"] = True
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
-            if selected_option == question["answer"]:
-                # スコア加算は一回のみ実行
-                if "score_updated" not in st.session_state or not st.session_state["score_updated"]:
-                    st.session_state["score"] += int(question.get("points", 1))
-                    st.session_state["score_updated"] = True
+            is_correct = (selected_option == question["answer"])
+            # スコア加算は一回のみ実行
+            if not st.session_state.get("score_updated", False) and is_correct:
+                st.session_state["score"] += int(question.get("points", 1))
+                st.session_state["score_updated"] = True
+            # 結果表示（見出し）
+            if is_correct:
                 st.markdown("<h2 style='color:green;'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
-            st.markdown(f"<p style='color:black; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+                st.write(f"あなたの選択: {selected_option}")
+                st.write(f"正解: {question['answer']}")
+            # 選択肢の結果ボックス（正解は緑、誤答選択は赤）
+            html_boxes = ["<div class='options-result'>"]
+            for opt in question["options"]:
+                classes = ["opt-box"]
+                if opt == question["answer"]:
+                    classes.append("correct")
+                if opt == selected_option and opt != question["answer"]:
+                    classes.append("wrong")
+                class_str = " ".join(classes)
+                html_boxes.append(f"<div class='{class_str}'>{opt}</div>")
+            html_boxes.append("</div>")
+            st.markdown("\n".join(html_boxes), unsafe_allow_html=True)
+            # 解説
+            st.markdown(
+                f"<p style='color:black; font-size:20px; margin-top:10px;'>解説: {question['explanation']}</p>",
+                unsafe_allow_html=True
+            )
+            # 次の問題へ
             st.button("次の問題へ", key="next_question_button", on_click=next_question_callback)
     else:
-        # 合計点とパーセンテージを計算（/100固定ではなく動的に）
+        # 合計点とパーセンテージを計算（動的）
         total_points = sum(q.get("points", 1) for q in st.session_state["quiz_data"])
         score = st.session_state["score"]
-        percent = round(score / total_points * 100) if total_points else 0
+        percent = (score / total_points * 100) if total_points else 0
         st.markdown("<h1 class='quiz-end'>クイズ終了！🎉</h1>", unsafe_allow_html=True)
-        st.write(f"あなたのスコア: {score} / {total_points}（{percent}%）")
+        st.write(f"あなたのスコア: {score} / {total_points}（{percent:.1f}%）")
         save_quiz_data()
         # クイズ終了後に最初の画面に戻るボタンを表示
         st.button("🔙 最初の画面に戻る", key="reset_button", on_click=end_quiz_callback)
