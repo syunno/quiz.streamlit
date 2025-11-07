@@ -31,6 +31,24 @@ def load_app_settings():
                 st.session_state["app_settings"] = json.load(f)
         except Exception as e:
             st.error(f"設定読み込みに失敗しました: {e}")
+def ensure_app_settings_defaults():
+    """古い設定ファイルでも必ず必要なキーを補完して安全化"""
+    s = st.session_state.get("app_settings", {})
+    # 背景設定
+    bg = s.get("bg")
+    if not isinstance(bg, dict):
+        bg = {}
+    bg.setdefault("type", "url")
+    bg.setdefault("value", "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg")
+    # 文字サイズ設定
+    ui = s.get("ui")
+    if not isinstance(ui, dict):
+        ui = {}
+    ui.setdefault("question_font_px", 36)  # 問題文
+    ui.setdefault("choices_font_px", 44)   # 選択肢ボタン
+    s["bg"] = bg
+    s["ui"] = ui
+    st.session_state["app_settings"] = s
 def validate_quiz_data(data):
     if not isinstance(data, list):
         raise ValueError("トップレベルはリストである必要があります。")
@@ -86,15 +104,11 @@ if "app_settings" not in st.session_state:
     load_app_settings()
     if "app_settings" not in st.session_state:
         st.session_state["app_settings"] = {
-            "bg": {
-                "type": "url",  # url | preset | data_uri
-                "value": "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"
-            },
-            "ui": {
-                "question_font_px": 36,  # 問題文の文字サイズ(px)
-                "choices_font_px": 44,   # 選択肢ボタンの文字サイズ(px)
-            }
+            "bg": {"type": "url", "value": "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"},
+            "ui": {"question_font_px": 36, "choices_font_px": 44},
         }
+# 必須キー補完（KeyError対策）
+ensure_app_settings_defaults()
 for key, default in {
     "quiz_started": False,
     "score": 0,
@@ -127,10 +141,9 @@ def next_question_callback():
 def toggle_edit_mode_callback():
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     reset_quiz()
-# ========== 背景画像の現在値 ==========
+# ========== 背景画像・文字サイズの現在値 ==========
 bg_conf = st.session_state["app_settings"]["bg"]
 bg_url = bg_conf.get("value") or "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"
-# 文字サイズの現在値
 ui_conf = st.session_state["app_settings"]["ui"]
 q_px = int(ui_conf.get("question_font_px", 36))
 c_px = int(ui_conf.get("choices_font_px", 44))
@@ -203,7 +216,7 @@ with st.sidebar.expander("🎨 背景画像設定"):
 with st.sidebar.expander("🔤 表示設定（文字サイズ）"):
     q_px_new = st.slider("問題文の文字サイズ", min_value=20, max_value=72, value=q_px, step=2)
     c_px_new = st.slider("選択肢ボタンの文字サイズ", min_value=24, max_value=84, value=c_px, step=2)
-    # 即時適用（スライダー変更で再実行されるため、都度更新）
+    # 即時適用
     st.session_state["app_settings"]["ui"]["question_font_px"] = int(q_px_new)
     st.session_state["app_settings"]["ui"]["choices_font_px"] = int(c_px_new)
     if st.button("文字サイズ設定を保存"):
@@ -212,8 +225,8 @@ with st.sidebar.expander("🔤 表示設定（文字サイズ）"):
 # 最新の文字サイズを反映
 q_px = int(st.session_state["app_settings"]["ui"]["question_font_px"])
 c_px = int(st.session_state["app_settings"]["ui"]["choices_font_px"])
-# 選択肢ボタンの最小高さは文字サイズに連動（より大きく見せる）
-min_h = max(90, int(c_px * 2.5))  # 文字サイズの約2.5倍を目安に高さ確保
+# 選択肢ボタンの最小高さは文字サイズに連動
+min_h = max(90, int(c_px * 2.5))
 # ========== CSS（背景に動的URL・文字サイズ反映） ==========
 st.markdown(f"""
     <style>
