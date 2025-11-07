@@ -81,7 +81,7 @@ if "quiz_data" not in st.session_state:
     for q in st.session_state["quiz_data"]:
         q.setdefault("explanation", "解説がまだ追加されていません")
         q.setdefault("points", 1)
-# アプリ設定（背景画像など）
+# アプリ設定（背景画像・文字サイズなど）
 if "app_settings" not in st.session_state:
     load_app_settings()
     if "app_settings" not in st.session_state:
@@ -89,6 +89,10 @@ if "app_settings" not in st.session_state:
             "bg": {
                 "type": "url",  # url | preset | data_uri
                 "value": "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"
+            },
+            "ui": {
+                "question_font_px": 36,  # 問題文の文字サイズ(px)
+                "choices_font_px": 44,   # 選択肢ボタンの文字サイズ(px)
             }
         }
 for key, default in {
@@ -126,6 +130,10 @@ def toggle_edit_mode_callback():
 # ========== 背景画像の現在値 ==========
 bg_conf = st.session_state["app_settings"]["bg"]
 bg_url = bg_conf.get("value") or "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"
+# 文字サイズの現在値
+ui_conf = st.session_state["app_settings"]["ui"]
+q_px = int(ui_conf.get("question_font_px", 36))
+c_px = int(ui_conf.get("choices_font_px", 44))
 # ========== サイドバー ==========
 st.sidebar.title("メニュー")
 st.sidebar.button("🔧 編集モード", key="edit_mode_button", on_click=toggle_edit_mode_callback)
@@ -150,7 +158,6 @@ with st.sidebar.expander("📁 データの入出力"):
             st.error(f"⚠️ インポートに失敗しました: {e}")
 # 背景画像設定
 with st.sidebar.expander("🎨 背景画像設定"):
-    # プリセット候補
     PRESETS = {
         "淡いグラデの抽象": "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?q=80&w=1920&auto=format&fit=crop",
         "青系グラデーション": "https://images.unsplash.com/photo-1517816434065-1662653d4958?q=80&w=1920&auto=format&fit=crop",
@@ -159,7 +166,7 @@ with st.sidebar.expander("🎨 背景画像設定"):
     }
     source_to_index = {"preset": 0, "url": 1, "data_uri": 2}
     current_source_idx = source_to_index.get(bg_conf.get("type", "url"), 1)
-    source = st.radio("背景ソース", ["プリセット", "URL", "ファイルアップロード"], index=current_source_idx, horizontal=True)
+    source = st.radio("背景ソース", ["プリセット", "URL", "ファイルアップロード"], index=current_source_idx)
     new_bg_type = bg_conf.get("type", "url")
     new_bg_value = bg_url
     if source == "プリセット":
@@ -192,7 +199,22 @@ with st.sidebar.expander("🎨 背景画像設定"):
             st.session_state["app_settings"]["bg"] = {"type": new_bg_type, "value": new_bg_value}
             save_app_settings()
             st.success("💾 背景設定を保存しました。")
-# ========== CSS（背景に動的URL反映） ==========
+# 表示設定（文字サイズ）
+with st.sidebar.expander("🔤 表示設定（文字サイズ）"):
+    q_px_new = st.slider("問題文の文字サイズ", min_value=20, max_value=72, value=q_px, step=2)
+    c_px_new = st.slider("選択肢ボタンの文字サイズ", min_value=24, max_value=84, value=c_px, step=2)
+    # 即時適用（スライダー変更で再実行されるため、都度更新）
+    st.session_state["app_settings"]["ui"]["question_font_px"] = int(q_px_new)
+    st.session_state["app_settings"]["ui"]["choices_font_px"] = int(c_px_new)
+    if st.button("文字サイズ設定を保存"):
+        save_app_settings()
+        st.success("💾 文字サイズ設定を保存しました。")
+# 最新の文字サイズを反映
+q_px = int(st.session_state["app_settings"]["ui"]["question_font_px"])
+c_px = int(st.session_state["app_settings"]["ui"]["choices_font_px"])
+# 選択肢ボタンの最小高さは文字サイズに連動（より大きく見せる）
+min_h = max(90, int(c_px * 2.5))  # 文字サイズの約2.5倍を目安に高さ確保
+# ========== CSS（背景に動的URL・文字サイズ反映） ==========
 st.markdown(f"""
     <style>
         .stApp {{
@@ -224,6 +246,11 @@ st.markdown(f"""
             color: #90EE90;
             font-size: 36px;
             text-align: center;
+        }}
+        /* 問題文の文字サイズ（動的） */
+        h2.question-title {{
+            font-size: {q_px}px;
+            line-height: 1.25;
         }}
         /* 画像の高さ制限（画面内に収める） */
         .stImage img {{
@@ -261,12 +288,12 @@ st.markdown(f"""
             border-radius: 10px !important;
             box-shadow: 0 2px 8px rgba(30,144,255,.25);
         }}
-        /* 選択肢ボタンを特大サイズに（回答前のみこのコンテナ内で使用） */
+        /* 選択肢ボタン（回答前のみ）：文字サイズと最小高さを動的に */
         .choices .stButton > button {{
             width: 100%;
-            padding: 30px 34px;               /* さらに大きく */
-            font-size: clamp(24px, 4.2vw, 44px);
-            min-height: 110px;                /* 高さをしっかり確保 */
+            padding: 28px 32px;
+            font-size: {c_px}px;
+            min-height: {min_h}px;
             border-radius: 18px !important;
             border: 5px solid #1E90FF;
             background: linear-gradient(180deg,#ffffff,#eef4ff);
@@ -363,8 +390,8 @@ elif st.session_state["quiz_started"]:
         total_questions = len(st.session_state["quiz_data"])
         st.caption(f"問題 {question_index + 1} / {total_questions} | この問題の点数: {question.get('points', 1)} 点")
         st.progress((question_index) / total_questions if total_questions else 0)
-        # 問題文
-        st.markdown(f"<h2>問題: {question['question']}</h2>", unsafe_allow_html=True)
+        # 問題文（動的サイズ）
+        st.markdown(f"<h2 class='question-title'>問題: {question['question']}</h2>", unsafe_allow_html=True)
         # 2列の選択肢ボタン（未回答時のみ表示＝回答後は一切表示しない）
         if not st.session_state["answered"]:
             cols = st.columns(2)
