@@ -1,5 +1,6 @@
 import streamlit as st
 import json
+import base64
 from pathlib import Path
 # ページ設定（横幅を広くして改行されにくくする）
 st.set_page_config(page_title="安全専念クイズ", layout="wide")
@@ -17,6 +18,19 @@ def load_quiz_data():
                 st.session_state["quiz_data"] = json.load(f)
         except Exception as e:
             st.error(f"データ読み込みに失敗しました: {e}")
+def save_app_settings():
+    try:
+        with open("app_settings.json", "w", encoding="utf-8") as f:
+            json.dump(st.session_state["app_settings"], f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        st.warning(f"設定保存に失敗しました: {e}")
+def load_app_settings():
+    if Path("app_settings.json").exists():
+        try:
+            with open("app_settings.json", "r", encoding="utf-8") as f:
+                st.session_state["app_settings"] = json.load(f)
+        except Exception as e:
+            st.error(f"設定読み込みに失敗しました: {e}")
 def validate_quiz_data(data):
     if not isinstance(data, list):
         raise ValueError("トップレベルはリストである必要があります。")
@@ -44,6 +58,12 @@ def safe_rerun():
         fn()
     else:
         st.experimental_rerun()
+def file_to_data_uri(uploaded_file) -> str:
+    """UploadedFile を CSS の background-image で使える data URI に変換"""
+    data = uploaded_file.getvalue()
+    mime = uploaded_file.type or "image/png"
+    b64 = base64.b64encode(data).decode("ascii")
+    return f"data:{mime};base64,{b64}"
 # ========== セッション初期化 ==========
 if "quiz_data" not in st.session_state:
     load_quiz_data()
@@ -61,6 +81,16 @@ if "quiz_data" not in st.session_state:
     for q in st.session_state["quiz_data"]:
         q.setdefault("explanation", "解説がまだ追加されていません")
         q.setdefault("points", 1)
+# アプリ設定（背景画像など）
+if "app_settings" not in st.session_state:
+    load_app_settings()
+    if "app_settings" not in st.session_state:
+        st.session_state["app_settings"] = {
+            "bg": {
+                "type": "url",  # url | preset | data_uri
+                "value": "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"
+            }
+        }
 for key, default in {
     "quiz_started": False,
     "score": 0,
@@ -93,10 +123,14 @@ def next_question_callback():
 def toggle_edit_mode_callback():
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     reset_quiz()
+# ========== 背景画像の現在値 ==========
+bg_conf = st.session_state["app_settings"]["bg"]
+bg_url = bg_conf.get("value") or "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"
 # ========== サイドバー ==========
 st.sidebar.title("メニュー")
 st.sidebar.button("🔧 編集モード", key="edit_mode_button", on_click=toggle_edit_mode_callback)
 st.sidebar.button("🔙 最初の画面", key="back_to_start_button", on_click=end_quiz_callback)
+# データの入出力（バックアップ/インポート）
 with st.sidebar.expander("📁 データの入出力"):
     json_str = json.dumps(st.session_state["quiz_data"], ensure_ascii=False, indent=2)
     st.download_button(
@@ -114,41 +148,85 @@ with st.sidebar.expander("📁 データの入出力"):
             st.success("✅ インポートしました。")
         except Exception as e:
             st.error(f"⚠️ インポートに失敗しました: {e}")
-# ========== CSS ==========
-st.markdown("""
+# 背景画像設定
+with st.sidebar.expander("🎨 背景画像設定"):
+    # プリセット候補
+    PRESETS = {
+        "淡いグラデの抽象": "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?q=80&w=1920&auto=format&fit=crop",
+        "青系グラデーション": "https://images.unsplash.com/photo-1517816434065-1662653d4958?q=80&w=1920&auto=format&fit=crop",
+        "シンプルテクスチャ": "https://images.unsplash.com/photo-1516637090014-cb1ab0d08fc7?q=80&w=1920&auto=format&fit=crop",
+        "初期画像（イラストAC）": "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg",
+    }
+    source_to_index = {"preset": 0, "url": 1, "data_uri": 2}
+    current_source_idx = source_to_index.get(bg_conf.get("type", "url"), 1)
+    source = st.radio("背景ソース", ["プリセット", "URL", "ファイルアップロード"], index=current_source_idx, horizontal=True)
+    new_bg_type = bg_conf.get("type", "url")
+    new_bg_value = bg_url
+    if source == "プリセット":
+        new_bg_type = "preset"
+        preset_name = st.selectbox("プリセットを選択", list(PRESETS.keys()))
+        new_bg_value = PRESETS[preset_name]
+        st.image(new_bg_value, caption=f"プレビュー: {preset_name}", use_column_width=True)
+    elif source == "URL":
+        new_bg_type = "url"
+        new_bg_value = st.text_input("画像URLを入力", value=bg_url)
+        if new_bg_value:
+            st.image(new_bg_value, caption="プレビュー", use_column_width=True)
+    else:  # ファイルアップロード
+        new_bg_type = "data_uri"
+        img_file = st.file_uploader("画像ファイルをアップロード", type=["png", "jpg", "jpeg", "webp"])
+        if img_file is not None:
+            try:
+                data_uri = file_to_data_uri(img_file)
+                new_bg_value = data_uri
+                st.image(img_file, caption="プレビュー（アップロード）", use_column_width=True)
+            except Exception as e:
+                st.error(f"画像の処理に失敗しました: {e}")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        if st.button("適用（プレビュー）"):
+            st.session_state["app_settings"]["bg"] = {"type": new_bg_type, "value": new_bg_value}
+            st.success("✅ 背景を適用しました。")
+    with col_b:
+        if st.button("設定を保存"):
+            st.session_state["app_settings"]["bg"] = {"type": new_bg_type, "value": new_bg_value}
+            save_app_settings()
+            st.success("💾 背景設定を保存しました。")
+# ========== CSS（背景に動的URL反映） ==========
+st.markdown(f"""
     <style>
-        .stApp {
-            background-image: url("https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg");
+        .stApp {{
+            background-image: url("{bg_url}");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-        }
-        .block-container { max-width: 1200px; }
-        h1 {
+        }}
+        .block-container {{ max-width: 1200px; }}
+        h1 {{
             color: #FFD700;
             font-size: clamp(28px, 4vw, 48px);
             text-align: center;
             margin-top: 20px;
-        }
-        h2 {
+        }}
+        h2 {{
             color: #ADD8E6;
             font-size: clamp(18px, 3.2vw, 36px);
             text-align: center;
             margin-bottom: 20px;
-        }
-        h2.subtitle {
+        }}
+        h2.subtitle {{
             white-space: nowrap;
             word-break: keep-all;
             overflow-wrap: normal;
             font-size: clamp(18px, 2.8vw, 36px);
-        }
-        .quiz-end {
+        }}
+        .quiz-end {{
             color: #90EE90;
             font-size: 36px;
             text-align: center;
-        }
+        }}
         /* 画像の高さ制限（画面内に収める） */
-        .stImage img {
+        .stImage img {{
             max-width: 100%;
             height: auto;
             max-height: 60vh;
@@ -157,12 +235,12 @@ st.markdown("""
             margin: 0 auto;
             border-radius: 6px;
             box-shadow: 0 2px 12px rgba(0,0,0,.25);
-        }
-        @media (max-width: 768px) {
-            .stImage img { max-height: 40vh; }
-        }
+        }}
+        @media (max-width: 768px) {{
+            .stImage img {{ max-height: 40vh; }}
+        }}
         /* 一般ボタン（次の問題へ等） */
-        .stButton > button {
+        .stButton > button {{
             width: 100%;
             padding: 14px 18px;
             font-size: clamp(16px, 2.2vw, 22px);
@@ -173,31 +251,31 @@ st.markdown("""
             margin-bottom: 12px;
             box-shadow: 0 2px 8px rgba(30,144,255,.25);
             font-weight: 600;
-        }
+        }}
         /* サイドバーのボタンは控えめに */
-        section[data-testid="stSidebar"] .stButton > button {
+        section[data-testid="stSidebar"] .stButton > button {{
             font-size: 16px;
             min-height: 40px;
             padding: 10px 12px;
             border-width: 2px;
             border-radius: 10px !important;
             box-shadow: 0 2px 8px rgba(30,144,255,.25);
-        }
+        }}
         /* 選択肢ボタンを特大サイズに（回答前のみこのコンテナ内で使用） */
-        .choices .stButton > button {
+        .choices .stButton > button {{
             width: 100%;
-            padding: 26px 30px;               /* さらに大きく */
-            font-size: clamp(22px, 3.8vw, 40px);
-            min-height: 96px;                 /* 高さをしっかり確保 */
-            border-radius: 16px !important;
-            border: 4px solid #1E90FF;
-            background: linear-gradient(180deg,#ffffff,#f1f6ff);
+            padding: 30px 34px;               /* さらに大きく */
+            font-size: clamp(24px, 4.2vw, 44px);
+            min-height: 110px;                /* 高さをしっかり確保 */
+            border-radius: 18px !important;
+            border: 5px solid #1E90FF;
+            background: linear-gradient(180deg,#ffffff,#eef4ff);
             color: #0b1f33;
-            margin-bottom: 16px;
-            box-shadow: 0 6px 18px rgba(30,144,255,.28);
+            margin-bottom: 18px;
+            box-shadow: 0 8px 22px rgba(30,144,255,.30);
             font-weight: 800;
             letter-spacing: 0.03em;
-        }
+        }}
     </style>
 """, unsafe_allow_html=True)
 # ========== 本体 ==========
@@ -290,7 +368,6 @@ elif st.session_state["quiz_started"]:
         # 2列の選択肢ボタン（未回答時のみ表示＝回答後は一切表示しない）
         if not st.session_state["answered"]:
             cols = st.columns(2)
-            # 選択肢ボタンを特大サイズにしたいので、各列に choices コンテナを付与
             for i, option in enumerate(question["options"]):
                 with cols[i % 2]:
                     st.markdown("<div class='choices'>", unsafe_allow_html=True)
@@ -298,14 +375,14 @@ elif st.session_state["quiz_started"]:
                         st.session_state["selected_option"] = option
                         st.session_state["answered"] = True
                     st.markdown("</div>", unsafe_allow_html=True)
-        # 回答後の表示（ボタンも色付きUIも出さない）
+        # 回答後の表示（ボタンは出さない）
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             is_correct = (selected_option == question["answer"])
             if not st.session_state.get("score_updated", False) and is_correct:
                 st.session_state["score"] += int(question.get("points", 1))
                 st.session_state["score_updated"] = True
-            # 結果テキストのみ表示（色付きボックス等はなし）
+            # 結果テキストのみ表示
             if is_correct:
                 st.markdown("<h2 style='color:green;'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
