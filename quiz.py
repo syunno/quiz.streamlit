@@ -147,7 +147,7 @@ st.markdown("""
             font-size: 36px;
             text-align: center;
         }
-        /* 画像の高さ制限 */
+        /* 画像の高さ制限（画面内に収める） */
         .stImage img {
             max-width: 100%;
             height: auto;
@@ -161,23 +161,35 @@ st.markdown("""
         @media (max-width: 768px) {
             .stImage img { max-height: 40vh; }
         }
-        /* ボタンを大きく見やすく */
+        /* メイン領域のボタンを特大化（選択肢ボタンを含む） */
         .stButton > button {
             width: 100%;
-            padding: 14px 18px;
-            font-size: clamp(16px, 2.4vw, 22px);
-            border-radius: 10px !important;
-            border: 2px solid #1E90FF;
+            padding: 20px 24px;
+            font-size: clamp(18px, 3vw, 28px);
+            min-height: 64px;
+            border-radius: 14px !important;
+            border: 3px solid #1E90FF;
             background: linear-gradient(180deg,#ffffff,#f6f9ff);
             color: #0b1f33;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             transition: transform .02s ease, box-shadow .2s ease, background .2s ease;
-            box-shadow: 0 2px 8px rgba(30,144,255,.25);
+            box-shadow: 0 3px 12px rgba(30,144,255,.25);
+            letter-spacing: 0.02em;
+            font-weight: 700;
         }
         .stButton > button:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 14px rgba(30,144,255,.35);
+            box-shadow: 0 10px 20px rgba(30,144,255,.35);
             background: linear-gradient(180deg,#ffffff,#eef4ff);
+        }
+        /* サイドバーのボタンはやや控えめに */
+        section[data-testid="stSidebar"] .stButton > button {
+            font-size: 16px;
+            min-height: 40px;
+            padding: 10px 12px;
+            border-width: 2px;
+            border-radius: 10px !important;
+            box-shadow: 0 2px 8px rgba(30,144,255,.25);
         }
         /* 回答後の結果表示（2列グリッド） */
         .options-result {
@@ -296,7 +308,7 @@ elif st.session_state["quiz_started"]:
         st.progress((question_index) / total_questions if total_questions else 0)
         # 問題文
         st.markdown(f"<h2>問題: {question['question']}</h2>", unsafe_allow_html=True)
-        # 2列の選択肢ボタン（未回答時）
+        # 2列の選択肢ボタン（未回答時のみ表示＝回答後は一切表示しない）
         if not st.session_state["answered"]:
             cols = st.columns(2)
             for i, option in enumerate(question["options"]):
@@ -304,7 +316,7 @@ elif st.session_state["quiz_started"]:
                     if st.button(option, key=f"option_{question_index}_{i}"):
                         st.session_state["selected_option"] = option
                         st.session_state["answered"] = True
-        # 回答後の表示
+        # 回答後の表示（ボタンは出さない）
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             is_correct = (selected_option == question["answer"])
@@ -317,7 +329,7 @@ elif st.session_state["quiz_started"]:
                 st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
                 st.write(f"あなたの選択: {selected_option}")
                 st.write(f"正解: {question['answer']}")
-            # 選択肢の結果（正解は緑／誤答として選んだものは赤）
+            # 選択肢の結果ボックス（正解は緑／誤答として選んだものは赤）
             html_boxes = ["<div class='options-result'>"]
             for opt in question["options"]:
                 classes = ["opt-box"]
