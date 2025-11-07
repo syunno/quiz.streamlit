@@ -2,8 +2,10 @@ import streamlit as st
 import json
 import base64
 from pathlib import Path
+
 # ページ設定
 st.set_page_config(page_title="安全専念クイズ", layout="wide")
+
 # ========== ユーティリティ ==========
 def save_quiz_data():
     try:
@@ -11,6 +13,7 @@ def save_quiz_data():
             json.dump(st.session_state["quiz_data"], f, ensure_ascii=False, indent=2)
     except Exception as e:
         st.warning(f"データ保存に失敗しました: {e}")
+
 def load_quiz_data():
     if Path("quiz_data.json").exists():
         try:
@@ -18,12 +21,14 @@ def load_quiz_data():
                 st.session_state["quiz_data"] = json.load(f)
         except Exception as e:
             st.error(f"データ読み込みに失敗しました: {e}")
+
 def save_app_settings():
     try:
         with open("app_settings.json", "w", encoding="utf-8") as f:
             json.dump(st.session_state["app_settings"], f, ensure_ascii=False, indent=2)
     except Exception as e:
         st.warning(f"設定保存に失敗しました: {e}")
+
 def load_app_settings():
     if Path("app_settings.json").exists():
         try:
@@ -31,22 +36,22 @@ def load_app_settings():
                 st.session_state["app_settings"] = json.load(f)
         except Exception as e:
             st.error(f"設定読み込みに失敗しました: {e}")
+
 def ensure_app_settings_defaults():
-    """古い設定ファイルでも必要キーを補完して安全化"""
     s = st.session_state.get("app_settings", {})
     bg = s.get("bg") if isinstance(s.get("bg"), dict) else {}
     bg.setdefault("type", "url")
     bg.setdefault("value", "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg")
     ui = s.get("ui") if isinstance(s.get("ui"), dict) else {}
-    # 文字サイズのデフォルト
-    ui.setdefault("title_font_px", 48)       # タイトル
-    ui.setdefault("subtitle_font_px", 28)    # サブタイトル
-    ui.setdefault("question_font_px", 36)    # 問題文
-    ui.setdefault("choices_font_px", 48)     # 選択肢ボタン
-    ui.setdefault("explain_font_px", 26)     # 解説
+    ui.setdefault("title_font_px", 48)
+    ui.setdefault("subtitle_font_px", 28)
+    ui.setdefault("question_font_px", 36)
+    ui.setdefault("choices_font_px", 48)
+    ui.setdefault("explain_font_px", 26)
     s["bg"] = bg
     s["ui"] = ui
     st.session_state["app_settings"] = s
+
 def validate_quiz_data(data):
     if not isinstance(data, list):
         raise ValueError("トップレベルはリストである必要があります。")
@@ -67,25 +72,25 @@ def validate_quiz_data(data):
         q.setdefault("points", 1)
         cleaned.append(q)
     return cleaned
+
 def safe_rerun():
     fn = getattr(st, "rerun", None)
     if callable(fn):
         fn()
     else:
         st.experimental_rerun()
+
 def file_to_data_uri(uploaded_file) -> str:
-    """UploadedFile -> CSS background-image で使える data URI に変換"""
     data = uploaded_file.getvalue()
     mime = uploaded_file.type or "image/png"
     b64 = base64.b64encode(data).decode("ascii")
     return f"data:{mime};base64,{b64}"
-def get_qparams():
-    """互換性重視で experimental_get_query_params を使用"""
-    params = st.experimental_get_query_params()
-    return {k: (v[0] if isinstance(v, list) and v else v) for k, v in params.items()}
-def clear_qparams():
-    """クエリパラメータをクリア"""
-    st.experimental_set_query_params()
+
+def clear_temp_answer_state():
+    st.session_state.pop("selected_option", None)
+    st.session_state["answered"] = False
+    st.session_state["score_updated"] = False
+
 # ========== セッション初期化 ==========
 if "quiz_data" not in st.session_state:
     load_quiz_data()
@@ -103,6 +108,7 @@ if "quiz_data" not in st.session_state:
     for q in st.session_state["quiz_data"]:
         q.setdefault("explanation", "解説がまだ追加されていません")
         q.setdefault("points", 1)
+
 if "app_settings" not in st.session_state:
     load_app_settings()
     if "app_settings" not in st.session_state:
@@ -117,6 +123,7 @@ if "app_settings" not in st.session_state:
             },
         }
 ensure_app_settings_defaults()
+
 for key, default in {
     "quiz_started": False,
     "score": 0,
@@ -127,44 +134,47 @@ for key, default in {
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
+
 # ========== コールバック ==========
 def reset_quiz():
     st.session_state["score"] = 0
     st.session_state["current_question"] = 0
-    st.session_state["answered"] = False
-    st.session_state["score_updated"] = False
-    st.session_state.pop("selected_option", None)
-    clear_qparams()
+    clear_temp_answer_state()
+
 def start_quiz_callback():
     reset_quiz()
     st.session_state["quiz_started"] = True
+
 def end_quiz_callback():
     reset_quiz()
     st.session_state["quiz_started"] = False
     st.session_state["edit_mode"] = False
+
 def next_question_callback():
     st.session_state["current_question"] += 1
-    st.session_state["answered"] = False
-    st.session_state["score_updated"] = False
-    st.session_state.pop("selected_option", None)
-    clear_qparams()
+    clear_temp_answer_state()
+
 def toggle_edit_mode_callback():
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     reset_quiz()
+
 # ========== 背景・文字サイズ ==========
 bg_conf = st.session_state["app_settings"]["bg"]
 bg_url = bg_conf.get("value") or "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"
+
 ui_conf = st.session_state["app_settings"]["ui"]
-t_px  = int(ui_conf.get("title_font_px", 48))      # タイトル
-sub_px = int(ui_conf.get("subtitle_font_px", 28))  # サブタイトル
-q_px  = int(ui_conf.get("question_font_px", 36))   # 問題文
-c_px  = int(ui_conf.get("choices_font_px", 48))    # 選択肢
-e_px  = int(ui_conf.get("explain_font_px", 26))    # 解説
-min_h = max(100, int(c_px * 2.6))                  # 選択肢ボタンの最小高さ
+t_px  = int(ui_conf.get("title_font_px", 48))
+sub_px = int(ui_conf.get("subtitle_font_px", 28))
+q_px  = int(ui_conf.get("question_font_px", 36))
+c_px  = int(ui_conf.get("choices_font_px", 48))
+e_px  = int(ui_conf.get("explain_font_px", 26))
+min_h = max(100, int(c_px * 2.6))  # 選択肢タイルの最小高さ
+
 # ========== サイドバー ==========
 st.sidebar.title("メニュー")
 st.sidebar.button("🔧 編集モード", key="edit_mode_button", on_click=toggle_edit_mode_callback)
 st.sidebar.button("🔙 最初の画面", key="back_to_start_button", on_click=end_quiz_callback)
+
 with st.sidebar.expander("📁 データの入出力"):
     json_str = json.dumps(st.session_state["quiz_data"], ensure_ascii=False, indent=2)
     st.download_button("💾 クイズデータをダウンロード", data=json_str.encode("utf-8"), file_name="quiz_data.json", mime="application/json")
@@ -177,6 +187,7 @@ with st.sidebar.expander("📁 データの入出力"):
             st.success("✅ インポートしました。")
         except Exception as e:
             st.error(f"⚠️ インポートに失敗しました: {e}")
+
 with st.sidebar.expander("🎨 背景画像設定"):
     PRESETS = {
         "淡いグラデの抽象": "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?q=80&w=1920&auto=format&fit=crop",
@@ -219,6 +230,7 @@ with st.sidebar.expander("🎨 背景画像設定"):
             st.session_state["app_settings"]["bg"] = {"type": new_bg_type, "value": new_bg_value}
             save_app_settings()
             st.success("💾 背景設定を保存しました。")
+
 with st.sidebar.expander("🔤 表示設定（文字サイズ）"):
     t_px_new   = st.slider("タイトルの文字サイズ",    min_value=28, max_value=96, value=t_px, step=2)
     sub_px_new = st.slider("サブタイトルの文字サイズ", min_value=20, max_value=72, value=sub_px, step=2)
@@ -235,7 +247,8 @@ with st.sidebar.expander("🔤 表示設定（文字サイズ）"):
     if st.button("文字サイズ設定を保存"):
         save_app_settings()
         st.success("💾 文字サイズ設定を保存しました。")
-# 最新値更新
+
+# 最新値（CSS用）
 ui_conf = st.session_state["app_settings"]["ui"]
 t_px  = int(ui_conf["title_font_px"])
 sub_px = int(ui_conf["subtitle_font_px"])
@@ -243,7 +256,8 @@ q_px  = int(ui_conf["question_font_px"])
 c_px  = int(ui_conf["choices_font_px"])
 e_px  = int(ui_conf["explain_font_px"])
 min_h = max(100, int(c_px * 2.6))
-# ========== CSS（背景・各文字サイズ・選択肢自作ボタン） ==========
+
+# ========== CSS（背景・巨大ラジオタイル） ==========
 st.markdown(f"""
     <style>
         .stApp {{
@@ -253,6 +267,7 @@ st.markdown(f"""
             background-attachment: fixed;
         }}
         .block-container {{ max-width: 1200px; }}
+
         /* タイトル／サブタイトル（動的サイズ） */
         h1.title-main {{
             color: #FFD700;
@@ -271,13 +286,16 @@ st.markdown(f"""
             overflow-wrap: normal;
             line-height: 1.2;
         }}
+
         .quiz-end {{ color: #90EE90; font-size: 36px; text-align: center; }}
+
         /* 問題文（動的サイズ） */
         h2.question-title {{
             font-size: {q_px}px;
             line-height: 1.25;
             text-align: left;
         }}
+
         /* 解説（動的サイズ） */
         p.explain-text {{
             color: #111;
@@ -285,12 +303,14 @@ st.markdown(f"""
             line-height: 1.6;
             margin-top: 12px;
         }}
+
         /* 画像の高さ制限 */
         .stImage img {{
             max-width: 100%; height: auto; max-height: 60vh; object-fit: contain;
             display: block; margin: 0 auto; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.25);
         }}
         @media (max-width: 768px) {{ .stImage img {{ max-height: 40vh; }} }}
+
         /* 一般ボタン（メイン領域） */
         .stButton > button {{
             width: 100%; padding: 14px 18px; font-size: clamp(16px, 2.2vw, 22px);
@@ -299,21 +319,23 @@ st.markdown(f"""
             color: #0b1f33; margin-bottom: 12px;
             box-shadow: 0 2px 8px rgba(30,144,255,.25); font-weight: 600;
         }}
+
         /* サイドバーのボタンは控えめに */
         section[data-testid="stSidebar"] .stButton > button {{
             font-size: 16px; min-height: 40px; padding: 10px 12px; border-width: 2px;
             border-radius: 10px !important; box-shadow: 0 2px 8px rgba(30,144,255,.25);
         }}
-        /* 自作の選択肢ボタン（HTML <a> をボタン風に） */
-        .choice-grid {{
+
+        /* ラジオ（選択肢）を巨大な2列タイルに */
+        div[data-testid="stRadio"] > div[role="radiogroup"] {{
             display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
         }}
         @media (max-width: 720px) {{
-            .choice-grid {{ grid-template-columns: 1fr; }}
+            div[data-testid="stRadio"] > div[role="radiogroup"] {{ grid-template-columns: 1fr; }}
         }}
-        a.choice-btn:link, a.choice-btn:visited {{
-            display: block; width: 100%;
-            text-decoration: none;
+        /* 各選択肢ラベルをボタン風に */
+        div[data-testid="stRadio"] > div[role="radiogroup"] > label {{
+            display: flex; align-items: center; justify-content: center;
             text-align: center;
             padding: 28px 32px;
             font-size: {c_px}px;
@@ -323,36 +345,44 @@ st.markdown(f"""
             background: linear-gradient(180deg,#ffffff,#eef4ff);
             color: #0b1f33;
             box-shadow: 0 10px 26px rgba(30,144,255,.30);
-            font-weight: 900; letter-spacing: 0.03em;
-            line-height: 1.2;
+            font-weight: 900; letter-spacing: 0.03em; line-height: 1.2;
+            cursor: pointer;
         }}
-        a.choice-btn:hover {{
+        div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover {{
             filter: brightness(0.98);
             transform: translateY(-1px);
             box-shadow: 0 14px 32px rgba(30,144,255,.36);
         }}
-        a.choice-btn:active {{
-            transform: translateY(0);
-            box-shadow: 0 6px 18px rgba(30,144,255,.30);
+        /* ラジオ丸アイコンを非表示（テキストのみ見せる） */
+        div[data-testid="stRadio"] input[type="radio"] {{
+            position: absolute; opacity: 0; pointer-events: none;
+        }}
+        /* プレースホルダー（ダミー1件目）を非表示にして初期選択を防ぐ */
+        div[data-testid="stRadio"] > div[role="radiogroup"] > label:nth-child(1) {{
+            display: none !important;
         }}
     </style>
 """, unsafe_allow_html=True)
+
 # ========== 本体 ==========
 if st.session_state["edit_mode"]:
     st.markdown("<h1>クイズ編集モード</h1>", unsafe_allow_html=True)
     for idx, q in enumerate(st.session_state["quiz_data"]):
         st.markdown(f"<h2>問題 {idx + 1}</h2>", unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
+
         num_options = st.number_input("選択肢数", min_value=2, max_value=8, value=len(q["options"]), step=1, key=f"num_options_{idx}")
         options = []
         for i in range(int(num_options)):
             default = q["options"][i] if i < len(q["options"]) else ""
             options.append(st.text_input(f"選択肢 {i+1}:", default, key=f"option_{idx}_{i}"))
+
         default_index = options.index(q["answer"]) if q["answer"] in options else 0
         answer = st.selectbox("正解を選択:", options if options else [""], index=default_index, key=f"answer_{idx}")
         image_url = st.text_input("画像URLを編集:", q.get("image_url", ""), key=f"image_url_{idx}")
         explanation = st.text_area("解説を編集:", q.get("explanation", ""), key=f"explanation_{idx}")
         points = st.number_input("点数を設定:", min_value=1, max_value=100, value=int(q.get("points", 1)), step=1, key=f"points_{idx}")
+
         col_u, col_d = st.columns(2)
         with col_u:
             if st.button(f"問題 {idx + 1} を更新", key=f"update_{idx}"):
@@ -377,6 +407,7 @@ if st.session_state["edit_mode"]:
                 save_quiz_data()
                 st.success(f"🗑️ 問題 {idx + 1} を削除しました！")
                 safe_rerun()
+
     st.markdown("### ➕ 新しい問題を追加")
     new_question = st.text_input("新しい問題:", key="new_question")
     new_num_options = st.number_input("選択肢数（2〜8）", min_value=2, max_value=8, value=4, step=1, key="new_num_options")
@@ -385,6 +416,7 @@ if st.session_state["edit_mode"]:
     new_image_url = st.text_input("画像URL:", key="new_image_url")
     new_explanation = st.text_area("解説:", key="new_explanation")
     new_points = st.number_input("点数を設定:", min_value=1, max_value=100, value=1, step=1, key="new_points")
+
     if st.button("➕ 問題を追加", key="add_question_button"):
         if new_question and all(opt.strip() for opt in new_options) and new_answer and new_explanation:
             if new_answer not in new_options:
@@ -402,60 +434,59 @@ if st.session_state["edit_mode"]:
                 st.success("✅ 新しい問題を追加しました！")
         else:
             st.error("⚠️ 必須項目をすべて入力してください！")
+
 elif st.session_state["quiz_started"]:
     question_index = st.session_state["current_question"]
     if question_index < len(st.session_state["quiz_data"]):
         question = st.session_state["quiz_data"][question_index]
-        # クエリパラメータでクリック検知
-        params = get_qparams()
-        sel_flag = params.get("sel")
-        qid = params.get("qid")
-        opt = params.get("opt")
-        if sel_flag and qid is not None and opt is not None and not st.session_state["answered"]:
-            try:
-                qid_i = int(qid)
-                opt_i = int(opt)
-                if qid_i == question_index and 0 <= opt_i < len(question["options"]):
-                    st.session_state["selected_option"] = question["options"][opt_i]
-                    st.session_state["answered"] = True
-                    clear_qparams()
-            except Exception:
-                pass
+
         # 画像表示（CSSで高さ制限）
         if question.get("image_url"):
             try:
                 st.image(question["image_url"], use_column_width=True)
             except Exception:
                 st.warning("画像の読み込みに失敗しました。")
+
         # 進捗と点数の表示
         total_questions = len(st.session_state["quiz_data"])
         st.caption(f"問題 {question_index + 1} / {total_questions} | この問題の点数: {question.get('points', 1)} 点")
         st.progress((question_index) / total_questions if total_questions else 0)
+
         # 問題文（動的サイズ）
         st.markdown(f"<h2 class='question-title'>問題: {question['question']}</h2>", unsafe_allow_html=True)
-        # 選択肢（未回答時のみ）: 自作巨大ボタンで2列表示
+
+        # 選択肢（未回答時のみ）: radioを巨大タイル化
         if not st.session_state["answered"]:
-            btns = []
-            for i, opt_text in enumerate(question["options"]):
-                href = f"?sel=1&qid={question_index}&opt={i}"
-                btns.append(f"<a class='choice-btn' href='{href}' rel='nofollow'>{opt_text}</a>")
-            st.markdown("<div class='choice-grid'>" + "\n".join(btns) + "</div>", unsafe_allow_html=True)
-        # 回答後（ボタンは出さない）
+            placeholder = "___placeholder___"  # 初期選択を防ぐダミー
+            radio_options = [placeholder] + question["options"]
+            selected = st.radio(
+                "選択肢", radio_options, index=0, key=f"radio_{question_index}", label_visibility="collapsed"
+            )
+            if selected != placeholder:
+                st.session_state["selected_option"] = selected
+                st.session_state["answered"] = True
+
+        # 回答後（選択肢は出さない）
         if st.session_state["answered"]:
             selected_option = st.session_state["selected_option"]
             is_correct = (selected_option == question["answer"])
+
             if not st.session_state.get("score_updated", False) and is_correct:
                 st.session_state["score"] += int(question.get("points", 1))
                 st.session_state["score_updated"] = True
+
             if is_correct:
                 st.markdown("<h2 style='color:green;'>🎉 正解！</h2>", unsafe_allow_html=True)
             else:
                 st.markdown("<h2 style='color:red;'>❌ 不正解！</h2>", unsafe_allow_html=True)
                 st.write(f"あなたの選択: {selected_option}")
                 st.write(f"正解: {question['answer']}")
+
             # 解説（動的サイズ）
             st.markdown(f"<p class='explain-text'>解説: {question['explanation']}</p>", unsafe_allow_html=True)
+
             st.button("次の問題へ", key="next_question_button", on_click=next_question_callback)
+
     else:
         total_points = sum(q.get("points", 1) for q in st.session_state["quiz_data"])
         score = st.session_state["score"]
@@ -464,8 +495,8 @@ elif st.session_state["quiz_started"]:
         st.write(f"あなたのスコア: {score} / {total_points}（{percent:.1f}%）")
         save_quiz_data()
         st.button("🔙 最初の画面に戻る", key="reset_button", on_click=end_quiz_callback)
+
 else:
-    # タイトル／サブタイトル（動的サイズ）
     st.markdown("<h1 class='title-main'>安全専念クイズ</h1>", unsafe_allow_html=True)
     st.markdown("<h2 class='subtitle'>クイズを解いて安全知識を身に付けよう！</h2>", unsafe_allow_html=True)
     st.button("▶️ クイズを開始", key="start_quiz_button", on_click=start_quiz_callback)
