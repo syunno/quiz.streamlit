@@ -245,14 +245,14 @@ st.markdown(f"""
         .block-container {{ max-width: 1200px; }}
         /* タイトル／サブタイトル（動的サイズ） */
         h1.title-main {{
-            color: #FFD700;
+            color: #0000FF;
             font-size: {t_px}px;
             text-align: center;
             margin: 8px 0 6px;
             line-height: 1.1;
         }}
         h2.subtitle {{
-            color: #ADD8E6;
+            color: #000000;
             font-size: {sub_px}px;
             text-align: center;
             margin: 4px 0 16px;
