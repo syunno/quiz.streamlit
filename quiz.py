@@ -294,18 +294,20 @@ st.markdown(f"""
             font-size: 16px; min-height: 40px; padding: 10px 12px; border-width: 2px;
             border-radius: 10px !important; box-shadow: 0 2px 8px rgba(30,144,255,.25);
         }}
-        /* ラジオ（選択肢）を巨大な2列タイルにし、グループ全体を中央寄せ */
+        /* ラジオ（選択肢）を2列のタイルにしてグリッドごと中央寄せ */
         div[data-testid="stRadio"] > div[role="radiogroup"] {{
             display: grid;
-            grid-template-columns: repeat(2, minmax(320px, 1fr));
+            grid-template-columns: repeat(2, minmax(320px, 460px)); /* 列幅を固定気味に */
             gap: 16px;
-            max-width: 1100px;
-            margin: 0 auto;               /* グループ自体を中央に */
-            justify-items: center;        /* 各タイルの内容を中央に */
+            justify-content: center;   /* グリッド全体を中央に寄せる */
+            justify-items: stretch;    /* 各タイルは列幅いっぱいに */
+            margin: 0 auto;
+            max-width: none;           /* 固定の横幅制限を解除 */
         }}
         @media (max-width: 720px) {{
             div[data-testid="stRadio"] > div[role="radiogroup"] {{
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(280px, 520px); /* 1列でも中央寄せ */
+                justify-content: center;
             }}
         }}
         /* 各選択肢ラベルをボタン風に（中央揃え） */
