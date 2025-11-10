@@ -31,14 +31,23 @@ def load_app_settings():
         except Exception as e:
             st.error(f"設定読み込みに失敗しました: {e}")
 def ensure_app_settings_defaults():
-    """古い設定ファイルでも必要キーを補完して安全化（背景関連は削除）"""
+    """古い設定ファイルでも必要キーを補完（背景関連は無し、文字サイズのキーを拡充）"""
     s = st.session_state.get("app_settings", {})
     ui = s.get("ui") if isinstance(s.get("ui"), dict) else {}
-    ui.setdefault("title_font_px", 48)       # タイトル
-    ui.setdefault("subtitle_font_px", 28)    # サブタイトル
-    ui.setdefault("question_font_px", 36)    # 問題文
-    ui.setdefault("choices_font_px", 48)     # 選択肢
-    ui.setdefault("explain_font_px", 26)     # 解説
+    # 全体/本文/各要素の文字サイズ
+    ui.setdefault("base_font_px", 16)             # HTML/全体のベース
+    ui.setdefault("body_font_px", 16)             # 一般本文（Markdown p/li 等）
+    ui.setdefault("label_font_px", 16)            # 各種ラベル（入力系ラベルなど）
+    ui.setdefault("caption_font_px", 14)          # キャプション（st.caption）
+    ui.setdefault("expander_header_font_px", 16)  # Expander のヘッダー
+    ui.setdefault("title_font_px", 48)            # タイトル（トップ画面）
+    ui.setdefault("subtitle_font_px", 28)         # サブタイトル
+    ui.setdefault("question_font_px", 36)         # 問題文
+    ui.setdefault("choices_font_px", 48)          # 選択肢タイル文字
+    ui.setdefault("explain_font_px", 26)          # 解説
+    ui.setdefault("button_font_px", 18)           # メイン領域のボタン
+    ui.setdefault("sidebar_body_font_px", 15)     # サイドバー本文
+    ui.setdefault("sidebar_button_font_px", 16)   # サイドバーボタン
     s["ui"] = ui
     st.session_state["app_settings"] = s
 def validate_quiz_data(data):
@@ -93,11 +102,19 @@ if "app_settings" not in st.session_state:
     if "app_settings" not in st.session_state:
         st.session_state["app_settings"] = {
             "ui": {
+                "base_font_px": 16,
+                "body_font_px": 16,
+                "label_font_px": 16,
+                "caption_font_px": 14,
+                "expander_header_font_px": 16,
                 "title_font_px": 48,
                 "subtitle_font_px": 28,
                 "question_font_px": 36,
                 "choices_font_px": 48,
                 "explain_font_px": 26,
+                "button_font_px": 18,
+                "sidebar_body_font_px": 15,
+                "sidebar_button_font_px": 16,
             },
         }
 ensure_app_settings_defaults()
@@ -129,14 +146,22 @@ def next_question_callback():
 def toggle_edit_mode_callback():
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     reset_quiz()
-# ========== 文字サイズ ==========
+# ========== 文字サイズ（現在値） ==========
 ui_conf = st.session_state["app_settings"]["ui"]
-t_px  = int(ui_conf.get("title_font_px", 48))      # タイトル
-sub_px = int(ui_conf.get("subtitle_font_px", 28))  # サブタイトル
-q_px  = int(ui_conf.get("question_font_px", 36))   # 問題文
-c_px  = int(ui_conf.get("choices_font_px", 48))    # 選択肢
-e_px  = int(ui_conf.get("explain_font_px", 26))    # 解説
-min_h = max(100, int(c_px * 2.6))                  # 選択肢タイルの最小高さ
+base_px   = int(ui_conf.get("base_font_px", 16))
+body_px   = int(ui_conf.get("body_font_px", 16))
+label_px  = int(ui_conf.get("label_font_px", 16))
+cap_px    = int(ui_conf.get("caption_font_px", 14))
+expd_px   = int(ui_conf.get("expander_header_font_px", 16))
+t_px      = int(ui_conf.get("title_font_px", 48))      # タイトル
+sub_px    = int(ui_conf.get("subtitle_font_px", 28))   # サブタイトル
+q_px      = int(ui_conf.get("question_font_px", 36))   # 問題文
+c_px      = int(ui_conf.get("choices_font_px", 48))    # 選択肢
+e_px      = int(ui_conf.get("explain_font_px", 26))    # 解説
+btn_px    = int(ui_conf.get("button_font_px", 18))     # メインボタン
+sb_body   = int(ui_conf.get("sidebar_body_font_px", 15))   # サイドバー本文
+sb_btn    = int(ui_conf.get("sidebar_button_font_px", 16)) # サイドバーボタン
+min_h     = max(100, int(c_px * 2.6))  # 選択肢タイルの最小高さ
 # ========== サイドバー ==========
 st.sidebar.title("メニュー")
 st.sidebar.button("🔧 編集モード", key="edit_mode_button", on_click=toggle_edit_mode_callback)
@@ -154,33 +179,79 @@ with st.sidebar.expander("📁 データの入出力"):
         except Exception as e:
             st.error(f"⚠️ インポートに失敗しました: {e}")
 with st.sidebar.expander("🔤 表示設定（文字サイズ）"):
-    t_px_new   = st.slider("タイトルの文字サイズ",    min_value=28, max_value=96, value=t_px, step=2)
-    sub_px_new = st.slider("サブタイトルの文字サイズ", min_value=20, max_value=72, value=sub_px, step=2)
-    q_px_new   = st.slider("問題文の文字サイズ",      min_value=20, max_value=72, value=q_px, step=2)
-    c_px_new   = st.slider("選択肢ボタンの文字サイズ", min_value=24, max_value=96, value=c_px, step=2)
-    e_px_new   = st.slider("解説の文字サイズ",        min_value=18, max_value=64, value=e_px, step=2)
+    st.caption("全体と主要要素の文字サイズを調整します。")
+    base_px_new   = st.slider("全体ベース（全域の基準）", min_value=12, max_value=22, value=base_px, step=1)
+    body_px_new   = st.slider("本文（Markdown p/li 等）", min_value=12, max_value=28, value=body_px, step=1)
+    label_px_new  = st.slider("ラベル（入力・ウィジェット）", min_value=12, max_value=28, value=label_px, step=1)
+    cap_px_new    = st.slider("キャプション（st.caption）", min_value=10, max_value=24, value=cap_px, step=1)
+    expd_px_new   = st.slider("エクスパンダーヘッダー", min_value=12, max_value=28, value=expd_px, step=1)
+    t_px_new      = st.slider("タイトル", min_value=28, max_value=96, value=t_px, step=2)
+    sub_px_new    = st.slider("サブタイトル", min_value=20, max_value=72, value=sub_px, step=2)
+    q_px_new      = st.slider("問題文", min_value=20, max_value=72, value=q_px, step=2)
+    c_px_new      = st.slider("選択肢タイル", min_value=24, max_value=96, value=c_px, step=2)
+    e_px_new      = st.slider("解説", min_value=18, max_value=64, value=e_px, step=2)
+    btn_px_new    = st.slider("ボタン（メイン領域）", min_value=12, max_value=32, value=btn_px, step=1)
+    sb_body_new   = st.slider("サイドバー本文", min_value=12, max_value=24, value=sb_body, step=1)
+    sb_btn_new    = st.slider("サイドバーボタン", min_value=12, max_value=28, value=sb_btn, step=1)
     st.session_state["app_settings"]["ui"].update({
+        "base_font_px": int(base_px_new),
+        "body_font_px": int(body_px_new),
+        "label_font_px": int(label_px_new),
+        "caption_font_px": int(cap_px_new),
+        "expander_header_font_px": int(expd_px_new),
         "title_font_px": int(t_px_new),
         "subtitle_font_px": int(sub_px_new),
         "question_font_px": int(q_px_new),
         "choices_font_px": int(c_px_new),
         "explain_font_px": int(e_px_new),
+        "button_font_px": int(btn_px_new),
+        "sidebar_body_font_px": int(sb_body_new),
+        "sidebar_button_font_px": int(sb_btn_new),
     })
     if st.button("文字サイズ設定を保存"):
         save_app_settings()
         st.success("💾 文字サイズ設定を保存しました。")
-# 最新値（CSS用）
+# 最新値（CSS用）を再取得
 ui_conf = st.session_state["app_settings"]["ui"]
-t_px  = int(ui_conf["title_font_px"])
-sub_px = int(ui_conf["subtitle_font_px"])
-q_px  = int(ui_conf["question_font_px"])
-c_px  = int(ui_conf["choices_font_px"])
-e_px  = int(ui_conf["explain_font_px"])
-min_h = max(100, int(c_px * 2.6))
-# ========== CSS（背景指定は削除。ラジオタイル中央寄せ/文字サイズ適用） ==========
+base_px   = int(ui_conf["base_font_px"])
+body_px   = int(ui_conf["body_font_px"])
+label_px  = int(ui_conf["label_font_px"])
+cap_px    = int(ui_conf["caption_font_px"])
+expd_px   = int(ui_conf["expander_header_font_px"])
+t_px      = int(ui_conf["title_font_px"])
+sub_px    = int(ui_conf["subtitle_font_px"])
+q_px      = int(ui_conf["question_font_px"])
+c_px      = int(ui_conf["choices_font_px"])
+e_px      = int(ui_conf["explain_font_px"])
+btn_px    = int(ui_conf["button_font_px"])
+sb_body   = int(ui_conf["sidebar_body_font_px"])
+sb_btn    = int(ui_conf["sidebar_button_font_px"])
+min_h     = max(100, int(c_px * 2.6))
+# ========== CSS（文字サイズを網羅的に適用、選択肢タイル中央寄せ） ==========
 st.markdown(f"""
     <style>
+        /* 全体のベース */
+        html, body, .stApp {{
+            font-size: {base_px}px;
+        }}
         .block-container {{ max-width: 1200px; }}
+        /* 本文（Markdown） */
+        .stMarkdown p, .stMarkdown li {{
+            font-size: {body_px}px;
+            line-height: 1.6;
+        }}
+        /* ラベル（ウィジェット類） */
+        label[data-testid="stWidgetLabel"] {{
+            font-size: {label_px}px;
+        }}
+        /* キャプション */
+        span[data-testid="stCaption"] {{
+            font-size: {cap_px}px;
+        }}
+        /* Expander ヘッダー */
+        div[data-testid="stExpander"] summary {{
+            font-size: {expd_px}px;
+        }}
         /* タイトル／サブタイトル（動的サイズ） */
         h1.title-main {{
             color: #0000FF;
@@ -199,7 +270,7 @@ st.markdown(f"""
             overflow-wrap: normal;
             line-height: 1.2;
         }}
-        .quiz-end {{ color: #2f855a; font-size: 36px; text-align: center; }}
+        .quiz-end {{ color: #2f855a; font-size: {q_px}px; text-align: center; }}
         /* 問題文（動的サイズ） */
         h2.question-title {{
             font-size: {q_px}px;
@@ -221,24 +292,29 @@ st.markdown(f"""
         @media (max-width: 768px) {{ .stImage img {{ max-height: 40vh; }} }}
         /* 一般ボタン（メイン領域） */
         .stButton > button {{
-            width: 100%; padding: 14px 18px; font-size: clamp(16px, 2.2vw, 22px);
+            width: 100%; padding: 14px 18px;
+            font-size: {btn_px}px !important;
             border-radius: 10px !important; border: 2px solid #1E90FF;
             background: linear-gradient(180deg,#ffffff,#f6f9ff);
             color: #0b1f33; margin-bottom: 12px;
             box-shadow: 0 2px 8px rgba(30,144,255,.25); font-weight: 600;
         }}
-        /* サイドバーのボタンは控えめに */
+        /* サイドバーの本文とボタン */
+        section[data-testid="stSidebar"] * {{
+            font-size: {sb_body}px;
+        }}
         section[data-testid="stSidebar"] .stButton > button {{
-            font-size: 16px; min-height: 40px; padding: 10px 12px; border-width: 2px;
+            font-size: {sb_btn}px !important;
+            min-height: 40px; padding: 10px 12px; border-width: 2px;
             border-radius: 10px !important; box-shadow: 0 2px 8px rgba(30,144,255,.25);
         }}
         /* ラジオ（選択肢）を2列のタイルにしてグリッドごと中央寄せ */
         div[data-testid="stRadio"] > div[role="radiogroup"] {{
             display: grid;
-            grid-template-columns: repeat(2, minmax(320px, 460px)); /* 列幅を固定気味に */
+            grid-template-columns: repeat(2, minmax(320px, 460px));
             gap: 16px;
-            justify-content: center;   /* グリッド全体を中央に寄せる */
-            justify-items: stretch;    /* 各タイルは列幅いっぱいに */
+            justify-content: center;   /* 全体を中央に */
+            justify-items: stretch;    /* タイルを列幅いっぱい */
             margin: 0 auto;
             max-width: none;
         }}
@@ -252,7 +328,7 @@ st.markdown(f"""
         div[data-testid="stRadio"] > div[role="radiogroup"] > label {{
             display: flex;
             align-items: center;
-            justify-content: center;      /* テキストを中央に */
+            justify-content: center;
             text-align: center;
             width: 100%;
             padding: 28px 32px;
@@ -272,24 +348,24 @@ st.markdown(f"""
             transform: translateY(-1px);
             box-shadow: 0 14px 32px rgba(30,144,255,.36);
         }}
-        /* 丸アイコンを完全に非表示（左寄りの原因を除去） */
+        /* 丸アイコンを非表示（左寄り防止） */
         div[data-testid="stRadio"] > div[role="radiogroup"] > label > div[data-baseweb="radio"] {{
             display: none !important;
         }}
-        /* ラジオの実際の input は操作不可にして見えないように（見た目のタイルだけクリック） */
+        /* ラジオ input を不可視 */
         div[data-testid="stRadio"] input[type="radio"] {{
             position: absolute;
             opacity: 0;
             pointer-events: none;
         }}
-        /* テキスト部分のフォントサイズを直接指定して強制適用（文字サイズスライダー値が確実に反映） */
+        /* タイル内テキストのサイズ（選択肢スライダーを反映） */
         div[data-testid="stRadio"] > div[role="radiogroup"] > label span,
         div[data-testid="stRadio"] > div[role="radiogroup"] > label p,
         div[data-testid="stRadio"] > div[role="radiogroup"] > label div[data-testid="stMarkdownContainer"] {{
             font-size: {c_px}px !important;
             line-height: 1.2;
         }}
-        /* ダミー最初の選択肢（プレースホルダー）を非表示にして初期選択を防ぐ */
+        /* ダミー最初の選択肢（プレースホルダー）非表示 */
         div[data-testid="stRadio"] > div[role="radiogroup"] > label:nth-child(1) {{
             display: none !important;
         }}
@@ -297,9 +373,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 # ========== 本体 ==========
 if st.session_state["edit_mode"]:
-    st.markdown("<h1>クイズ編集モード</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='title-main'>クイズ編集モード</h1>", unsafe_allow_html=True)
     for idx, q in enumerate(st.session_state["quiz_data"]):
-        st.markdown(f"<h2>問題 {idx + 1}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<h2 class='question-title'>問題 {idx + 1}</h2>", unsafe_allow_html=True)
         question_text = st.text_input("問題を編集:", q["question"], key=f"question_{idx}")
         num_options = st.number_input("選択肢数", min_value=2, max_value=8, value=len(q["options"]), step=1, key=f"num_options_{idx}")
         options = []
@@ -415,3 +491,4 @@ else:
     st.markdown("<h1 class='title-main'>安全専念クイズ</h1>", unsafe_allow_html=True)
     st.markdown("<h2 class='subtitle'>クイズを解いて安全知識を身に付けよう！</h2>", unsafe_allow_html=True)
     st.button("▶️ クイズを開始", key="start_quiz_button", on_click=start_quiz_callback)
+
