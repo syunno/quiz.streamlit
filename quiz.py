@@ -1,6 +1,5 @@
 import streamlit as st
 import json
-import base64
 from pathlib import Path
 # ページ設定
 st.set_page_config(page_title="安全専念クイズ", layout="wide")
@@ -32,18 +31,14 @@ def load_app_settings():
         except Exception as e:
             st.error(f"設定読み込みに失敗しました: {e}")
 def ensure_app_settings_defaults():
-    """古い設定ファイルでも必要キーを補完して安全化"""
+    """古い設定ファイルでも必要キーを補完して安全化（背景関連は削除）"""
     s = st.session_state.get("app_settings", {})
-    bg = s.get("bg") if isinstance(s.get("bg"), dict) else {}
-    bg.setdefault("type", "url")
-    bg.setdefault("value", "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg")
     ui = s.get("ui") if isinstance(s.get("ui"), dict) else {}
     ui.setdefault("title_font_px", 48)       # タイトル
     ui.setdefault("subtitle_font_px", 28)    # サブタイトル
     ui.setdefault("question_font_px", 36)    # 問題文
     ui.setdefault("choices_font_px", 48)     # 選択肢
     ui.setdefault("explain_font_px", 26)     # 解説
-    s["bg"] = bg
     s["ui"] = ui
     st.session_state["app_settings"] = s
 def validate_quiz_data(data):
@@ -72,12 +67,6 @@ def safe_rerun():
         fn()
     else:
         st.experimental_rerun()
-def file_to_data_uri(uploaded_file) -> str:
-    """UploadedFile -> CSS background-image で使える data URI に変換"""
-    data = uploaded_file.getvalue()
-    mime = uploaded_file.type or "image/png"
-    b64 = base64.b64encode(data).decode("ascii")
-    return f"data:{mime};base64,{b64}"
 def clear_temp_answer_state():
     st.session_state.pop("selected_option", None)
     st.session_state["answered"] = False
@@ -103,7 +92,6 @@ if "app_settings" not in st.session_state:
     load_app_settings()
     if "app_settings" not in st.session_state:
         st.session_state["app_settings"] = {
-            "bg": {"type": "url", "value": "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"},
             "ui": {
                 "title_font_px": 48,
                 "subtitle_font_px": 28,
@@ -141,9 +129,7 @@ def next_question_callback():
 def toggle_edit_mode_callback():
     st.session_state["edit_mode"] = not st.session_state["edit_mode"]
     reset_quiz()
-# ========== 背景・文字サイズ ==========
-bg_conf = st.session_state["app_settings"]["bg"]
-bg_url = bg_conf.get("value") or "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg"
+# ========== 文字サイズ ==========
 ui_conf = st.session_state["app_settings"]["ui"]
 t_px  = int(ui_conf.get("title_font_px", 48))      # タイトル
 sub_px = int(ui_conf.get("subtitle_font_px", 28))  # サブタイトル
@@ -167,48 +153,6 @@ with st.sidebar.expander("📁 データの入出力"):
             st.success("✅ インポートしました。")
         except Exception as e:
             st.error(f"⚠️ インポートに失敗しました: {e}")
-with st.sidebar.expander("🎨 背景画像設定"):
-    PRESETS = {
-        "淡いグラデの抽象": "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?q=80&w=1920&auto=format&fit=crop",
-        "青系グラデーション": "https://images.unsplash.com/photo-1517816434065-1662653d4958?q=80&w=1920&auto=format&fit=crop",
-        "シンプルテクスチャ": "https://images.unsplash.com/photo-1516637090014-cb1ab0d08fc7?q=80&w=1920&auto=format&fit=crop",
-        "初期画像（イラストAC）": "https://data.ac-illust.com/data/thumbnails/a5/a550c1129e4997ff4e4b20abcedd1391_t.jpeg",
-    }
-    source_to_index = {"preset": 0, "url": 1, "data_uri": 2}
-    current_source_idx = source_to_index.get(bg_conf.get("type", "url"), 1)
-    source = st.radio("背景ソース", ["プリセット", "URL", "ファイルアップロード"], index=current_source_idx)
-    new_bg_type = bg_conf.get("type", "url")
-    new_bg_value = bg_url
-    if source == "プリセット":
-        new_bg_type = "preset"
-        preset_name = st.selectbox("プリセットを選択", list(PRESETS.keys()))
-        new_bg_value = PRESETS[preset_name]
-        st.image(new_bg_value, caption=f"プレビュー: {preset_name}", use_column_width=True)
-    elif source == "URL":
-        new_bg_type = "url"
-        new_bg_value = st.text_input("画像URLを入力", value=bg_url)
-        if new_bg_value:
-            st.image(new_bg_value, caption="プレビュー", use_column_width=True)
-    else:
-        new_bg_type = "data_uri"
-        img_file = st.file_uploader("画像ファイルをアップロード", type=["png", "jpg", "jpeg", "webp"])
-        if img_file is not None:
-            try:
-                data_uri = file_to_data_uri(img_file)
-                new_bg_value = data_uri
-                st.image(img_file, caption="プレビュー（アップロード）", use_column_width=True)
-            except Exception as e:
-                st.error(f"画像の処理に失敗しました: {e}")
-    col_a, col_b = st.columns(2)
-    with col_a:
-        if st.button("適用（プレビュー）"):
-            st.session_state["app_settings"]["bg"] = {"type": new_bg_type, "value": new_bg_value}
-            st.success("✅ 背景を適用しました。")
-    with col_b:
-        if st.button("設定を保存"):
-            st.session_state["app_settings"]["bg"] = {"type": new_bg_type, "value": new_bg_value}
-            save_app_settings()
-            st.success("💾 背景設定を保存しました。")
 with st.sidebar.expander("🔤 表示設定（文字サイズ）"):
     t_px_new   = st.slider("タイトルの文字サイズ",    min_value=28, max_value=96, value=t_px, step=2)
     sub_px_new = st.slider("サブタイトルの文字サイズ", min_value=20, max_value=72, value=sub_px, step=2)
@@ -233,15 +177,9 @@ q_px  = int(ui_conf["question_font_px"])
 c_px  = int(ui_conf["choices_font_px"])
 e_px  = int(ui_conf["explain_font_px"])
 min_h = max(100, int(c_px * 2.6))
-# ========== CSS（背景・巨大ラジオタイル・テキストサイズ強制適用・中央寄せ） ==========
+# ========== CSS（背景指定は削除。ラジオタイル中央寄せ/文字サイズ適用） ==========
 st.markdown(f"""
     <style>
-        .stApp {{
-            background-image: url("{bg_url}");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }}
         .block-container {{ max-width: 1200px; }}
         /* タイトル／サブタイトル（動的サイズ） */
         h1.title-main {{
@@ -261,7 +199,7 @@ st.markdown(f"""
             overflow-wrap: normal;
             line-height: 1.2;
         }}
-        .quiz-end {{ color: #90EE90; font-size: 36px; text-align: center; }}
+        .quiz-end {{ color: #2f855a; font-size: 36px; text-align: center; }}
         /* 問題文（動的サイズ） */
         h2.question-title {{
             font-size: {q_px}px;
@@ -302,7 +240,7 @@ st.markdown(f"""
             justify-content: center;   /* グリッド全体を中央に寄せる */
             justify-items: stretch;    /* 各タイルは列幅いっぱいに */
             margin: 0 auto;
-            max-width: none;           /* 固定の横幅制限を解除 */
+            max-width: none;
         }}
         @media (max-width: 720px) {{
             div[data-testid="stRadio"] > div[role="radiogroup"] {{
