@@ -1,5 +1,5 @@
 [{"question": "歩行中の災害を防ぐ為に、「歩行５つのKPI」があります。隠されている残り一つは何でしょう？", "options": ["走らない", "斜め横断しない", "足元を確認する", "通路以外を通らない"], "answer": "斜め横断しない", "image_url": "mon1.png", "explanation": "ポ・ケ・テ・ナ・シなので正解は斜め横断しない"}, 
-  {"question": "３D計測機器を予約するアプリは？", "options": ["Outlook", "Teams", "Excel", "Forms"], "answer": "Outlook", "image_url": "mon2.png", "explanation": "正解はOutlook"}, 
+  {"question": "歩きスマホをすると視界は普段のどれくらいになる？（普段の視界を100％とする）", "options": ["5%", "20%", "50%", "80%"], "answer": "5%", "image_url": "mon2.png", "explanation": "歩きスマホは、視界を極端に狭めるだけでなく、歩行の安定性や反応速度にも悪影響を及ぼします。スマホを操作する際は、必ず立ち止まってから行うようにしましょう"}, 
   {"question": "３D計測機器を使用した後に必ずすることは？", "options": ["洗浄作業", "点検Forms", "キャリブレーション", "校正作業"], "answer": "点検Forms", "image_url": "mon3.png", "explanation": "正解は点検Forms"},
   {"question": "WM6000で①～④どこまでのサイズが測れる？", "options": ["①", "②", "③", "④"], "answer": "③", "image_url": "mon4.png", "explanation": "正解は③"},
   {"question": "非接触で測りにくいものは？", "options": ["光沢のあるもの", "複雑な形状", "柔らかいもの", "全て測定可能"], "answer": "光沢のあるもの", "image_url": "mon5.png", "explanation": "正解は光沢のあるもの"},
